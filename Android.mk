@@ -17,8 +17,12 @@ BUILD_TOP := $(shell pwd)
 ifneq ($(filter x86%,$(TARGET_ARCH)),)
 LOCAL_PATH := $(call my-dir)
 
-RELEASE_OS_TITLE := BlissOS
 VER := $(VERSION)
+ifeq ($(RELEASE_OS_TITLE),)
+RELEASE_OS_TITLE := BlissOS-$(VERSION)
+else
+RELEASE_OS_TITLE := $(RELEASE_OS_TITLE)
+endif
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := iso_from_target_files
@@ -101,7 +105,17 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
 
-ISO_IMAGE := $(PRODUCT_OUT)/$(BLISS_BUILD_ZIP).iso
+# Use vendor defined version names
+ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)-$(TARGET_ARCH)-$(shell date +%Y%m%d%H%M)
+
+BUILD_NAME_VARIANT := $(ROM_VENDOR_VERSION)
+ifeq ($(BLISS_BUILD_ZIP),)
+ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)$(BLISS_SPECIAL_VARIANT)-$(TARGET_ARCH)-$(shell date +%Y%m%d%H)
+else
+ROM_VENDOR_VERSION := $(BLISS_BUILD_ZIP)
+endif
+
+ISO_IMAGE := $(PRODUCT_OUT)/$(ROM_VENDOR_VERSION).iso
 $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG)
 	@echo ----- Making iso image ------
 	PATH="/sbin:/usr/sbin:/bin:/usr/bin"; \
