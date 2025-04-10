@@ -198,7 +198,7 @@ EOF
 }
 
 # configure debugging output
-if [ "$DEBUG" ] || [ "$INSTALL" ]; then
+if [ "$DEBUG" ] || [ "$INSTALL" ] || [ "$RCVRY" ]; then
 	LOG=/tmp/log
 	set -x
 else
@@ -225,7 +225,7 @@ if test x"$HAS_CTTY" != x"Yes"; then
 		mknod /dev/tty2 c 4 2 && openvt
 		mknod /dev/tty3 c 4 3 && openvt
 	fi
-	if [ "$INSTALL" ] || [ "$DEBUG" ]; then
+	if [ "$INSTALL" ] || [ "$DEBUG" ] || [ "$RCVRY" ]; then
 		echo 0 0 0 0 >/proc/sys/kernel/printk
 	fi
 	# initialise /dev (first time)
