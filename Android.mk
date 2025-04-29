@@ -17,8 +17,8 @@ BUILD_TOP := $(shell pwd)
 ifneq ($(filter x86%,$(TARGET_ARCH)),)
 LOCAL_PATH := $(call my-dir)
 
-RELEASE_OS_TITLE := BlissOS
-VER := $(VERSION)
+RELEASE_OS_TITLE := LineageOS
+VER := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := iso_from_target_files
@@ -101,7 +101,7 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
 
-ISO_IMAGE := $(PRODUCT_OUT)/$(BLISS_BUILD_ZIP).iso
+ISO_IMAGE := $(PRODUCT_OUT)/lineage-$(LINEAGE_VERSION).iso
 $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG)
 	@echo ----- Making iso image ------
 	PATH="/sbin:/usr/sbin:/bin:/usr/bin"; \
@@ -111,28 +111,8 @@ $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG)
 		-hfs-bless-by i /System/Library/CoreServices/boot.efi --efi-boot efi.img -efi-boot-part --efi-boot-image \
 		--protective-msdos-label -o $@ $^ --sort-weight 0 / --sort-weight 1 /boot \
 		-V "$(DISK_LABEL)"
-	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"      ___           ___                   ___           ___      "${CL_CYN}
-	@echo -e ${CL_CYN}"     /\  \         /\__\      ___        /\  \         /\  \     "${CL_CYN}
-	@echo -e ${CL_CYN}"    /::\  \       /:/  /     /\  \      /::\  \       /::\  \    "${CL_CYN}
-	@echo -e ${CL_CYN}"   /:/\:\  \     /:/  /      \:\  \    /:/\ \  \     /:/\ \  \   "${CL_CYN}
-	@echo -e ${CL_CYN}"  /::\~\:\__\   /:/  /       /::\__\  _\:\~\ \  \   _\:\~\ \  \  "${CL_CYN}
-	@echo -e ${CL_CYN}" /:/\:\ \:\__\ /:/__/     __/:/\/__/ /\ \:\ \ \__\ /\ \:\ \ \__\ "${CL_CYN}
-	@echo -e ${CL_CYN}" \:\~\:\/:/  / \:\  \    /\/:/  /    \:\ \:\ \/__/ \:\ \:\ \/__/ "${CL_CYN}
-	@echo -e ${CL_CYN}"  \:\ \::/  /   \:\  \   \::/__/      \:\ \:\__\    \:\ \:\__\   "${CL_CYN}
-	@echo -e ${CL_CYN}"   \:\/:/  /     \:\  \   \:\__\       \:\/:/  /     \:\/:/  /   "${CL_CYN}
-	@echo -e ${CL_CYN}"    \::/__/       \:\__\   \/__/        \::/  /       \::/  /    "${CL_CYN}
-	@echo -e ${CL_CYN}"     ~~            \/__/                 \/__/         \/__/     "${CL_CYN}
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"===========-Bliss Package Complete-==========="${CL_RST}
-	@echo -e ${CL_CYN}"Zip: "${CL_MAG} $(ISO_IMAGE)${CL_RST}
-	@echo -e ${CL_CYN}"SHA256: "${CL_MAG}" `cat $(ISO_IMAGE).sha256 | cut -d ' ' -f 1`"${CL_RST}
-	@echo -e ${CL_CYN}"Size:"${CL_MAG}" `ls -lah $(ISO_IMAGE) | cut -d ' ' -f 5`"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ${CL_CYN}"Have A Truly Blissful Experience"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ""
+	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256sum
+	@echo "Package Complete: $(ISO_IMAGE)" >&2
 
 .PHONY: iso_img
 iso_img: $(ISO_IMAGE)
