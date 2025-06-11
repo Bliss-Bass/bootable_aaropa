@@ -156,7 +156,7 @@ elif [[ "$SYSTEM_FS" == "sfs" ]]; then
 fi
 
 ## Copy files from aaropa
-cp -t $tmp_dir -r $AAROPA_LOCATION/iso/*
+cp -t $tmp_dir -r $AAROPA_LOCATION/iso/.
 
 ## Editing some config files
 # May consider to remove this
