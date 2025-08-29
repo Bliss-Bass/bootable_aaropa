@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # URL for the GitHub release page
-RELEASE_URL="https://github.com/Bliss-Bass/aaropa_rootfs/releases/latest"
+RELEASE_URL="https://github.com/Ananda-Aropa/aaropa_rootfs_installer_bass/releases/latest"
 
 # Get the script's directory and change to it
 SCRIPT_DIR=$(dirname "$0")
@@ -61,10 +61,13 @@ extract_grub_rescue_iso() {
   rm grub-rescue.iso
 }
 
-# Function to move install.sfs to the iso directory
-move_install_sfs() {
+# Function to move files to the iso directory
+move_files() {
   echo "Moving install.sfs to iso directory..."
   mv install.sfs iso/
+	# echo "Syncing iso overlay..."
+	# cp -rf iso_overlay/. iso/
+	# rm -rf iso_overlay
 }
 
 # Function to extract initrd_lib.tar.gz and move the content to the initrd folder
@@ -130,7 +133,7 @@ case "$1" in
 
     # Process the downloaded files
     extract_grub_rescue_iso
-    move_install_sfs
+    move_files
     extract_initrd_lib
 
     echo "Script execution complete!"

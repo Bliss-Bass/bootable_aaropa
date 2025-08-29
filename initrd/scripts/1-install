@@ -6,27 +6,38 @@
 # We explicitely grant the right to use the scripts
 # with Android-x86 project.
 #
+# shellcheck disable=3043
 
 setup_install() {
 	# Setup overlay on /install
-	mkdir -p /install /tmp/i_workdir /tmp/i_upperdir
-	mount -o loop "/mnt/$SRC/$INSTALL" /install
+	local LOWER UPPER=/tmp/i_upperdir WORK=/tmp/i_workdir I=/install
+	LOWER=$I
+	local _overlay
+	for _overlay in /etc /usr/share; do
+		if [ -d "/mnt/$SRC/$_overlay" ]; then
+			mount -t overlay \
+				-o lowerdir=$I/$_overlay:/mnt/$SRC/$_overlay \
+				overlay $I/$_overlay
+		fi
+	done
+	mkdir -p $I $UPPER $WORK
+	mount -o loop "/mnt/$SRC/$INSTALL" $I
 	mount -t overlay \
-		-o lowerdir=/install,upperdir=/tmp/i_upperdir,workdir=/tmp/i_workdir \
-		overlay /install
+		-o lowerdir=$LOWER,upperdir=$UPPER,workdir=$WORK \
+		overlay $I
 
 	# Move mountpoints
-	mount --move /android /install/android
-	mount --move /mnt /install/cdrom
+	mount --move /android $I/android
+	mount --move /mnt $I/cdrom
 
 	# Additional setup to bind system.img to /source
 	if mountpoint -q /android; then
-		mount --move /android /install/source
+		mount --move /android $I/source
 	else
-		mount --bind /install/cdrom /install/source
+		mount --bind $I/cdrom $I/source
 	fi
 
 	# Post setup
 	rm -f /system
-	ln -s /install/android/system /
+	ln -s $I/android/system /
 }
