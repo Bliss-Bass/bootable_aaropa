@@ -10,16 +10,11 @@
 
 setup_install() {
 	# Setup overlay on /install
-	local LOWER UPPER=/tmp/i_upperdir WORK=/tmp/i_workdir I=/install
+	local LOWER UPPER=/tmp/i_upperdir WORK=/tmp/i_workdir I=/install O="/mnt/$SRC/overlay"
 	LOWER=$I
-	local _overlay
-	for _overlay in /etc /usr/share; do
-		if [ -d "/mnt/$SRC/$_overlay" ]; then
-			mount -t overlay \
-				-o lowerdir=$I/$_overlay:/mnt/$SRC/$_overlay \
-				overlay $I/$_overlay
-		fi
-	done
+	if [ -d "$O" ]; then
+		LOWER=$LOWER:$O
+	fi
 	mkdir -p $I $UPPER $WORK
 	mount -o loop "/mnt/$SRC/$INSTALL" $I
 	mount -t overlay \
