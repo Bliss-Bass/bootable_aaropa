@@ -1,32 +1,38 @@
 # shellcheck shell=sh
-# By Shadichy <shadichy.dev@gmail.com>
+# By Shadichy <shadichy@blisslabs.org>
 # Last updated 2024/10/01
 #
 # License: GNU Public License
 # We explicitely grant the right to use the scripts
 # with Android-x86 project.
 #
+# shellcheck disable=3043
 
 setup_install() {
 	# Setup overlay on /install
-	mkdir -p /install /tmp/i_workdir /tmp/i_upperdir
-	mount -o loop "/mnt/$SRC/$INSTALL" /install
+	local LOWER UPPER=/tmp/i_upperdir WORK=/tmp/i_workdir I=/install O="/mnt/$SRC/overlay"
+	LOWER=$I
+	if [ -d "$O" ]; then
+		LOWER=$LOWER:$O
+	fi
+	mkdir -p $I $UPPER $WORK
+	mount -o loop "/mnt/$SRC/$INSTALL" $I
 	mount -t overlay \
-		-o lowerdir=/install,upperdir=/tmp/i_upperdir,workdir=/tmp/i_workdir \
-		overlay /install
+		-o lowerdir=$LOWER,upperdir=$UPPER,workdir=$WORK \
+		overlay $I
 
 	# Move mountpoints
-	mount --move /android /install/android
-	mount --move /mnt /install/cdrom
+	mount --move /android $I/android
+	mount --move /mnt $I/cdrom
 
 	# Additional setup to bind system.img to /source
 	if mountpoint -q /android; then
-		mount --move /android /install/source
+		mount --move /android $I/source
 	else
-		mount --bind /install/cdrom /install/source
+		mount --bind $I/cdrom $I/source
 	fi
 
 	# Post setup
 	rm -f /system
-	ln -s /install/android/system /
+	ln -s $I/android/system /
 }

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Ānanda Āropa (/ɑːˈnʌndə/ /ɑː.ɾɐw.pɐ/) or `aaropa` is BlissLabs' latest attempt in improving the installer & initrd for BlissOS, with some of additional features & improvements compared to the original Android-x86 console installer:
+Ānanda Āropa (/ɑːˈnʌndə/ /ɑː.ɾɐw.pɐ/) or `aaropa` is BlissLabs' latest attempt in improving the installer & initrd for BlissOS/BassOS, with some of additional features & improvements compared to the original Android-x86 console installer:
 
 - Refactored Android-x86 init scripts.
 - All prebuilts are now being downloaded instead of stored in the repo.
@@ -30,19 +30,19 @@ As of right now, `aaropa` only supports `x86_64`.
 
 Beside this main repo, `aaropa` is also made of several other repos including:
 
-- [![](https://github.com/BlissOS/aaropa_calamares/actions/workflows/build-devuan-ceres.yml/badge.svg)](https://github.com/BlissOS/aaropa_calamares) <p>
+- [![](https://github.com/Bliss-Bass/aaropa_calamares/actions/workflows/build-devuan-ceres.yml/badge.svg)](https://github.com/Bliss-Bass/aaropa_calamares) <p>
 This repo contains patches & modules for Calamares which will be built into .deb file
 
-- ![https://github.com/BlissOS/grub2-themes](https://github.com/BlissOS/grub2-themes/actions/workflows/build-devuan-ceres.yml/badge.svg) <p>
+- ![https://github.com/Bliss-Bass/grub2-themes](https://github.com/Bliss-Bass/grub2-themes/actions/workflows/build-devuan-ceres.yml/badge.svg) <p>
 This repo contains the Grub2 theme that we're using which will be built into .deb file
 
-- [![](https://github.com/BlissOS/aaropa_busybox/actions/workflows/build-linux.yml/badge.svg)](https://github.com/BlissOS/aaropa_busybox) <p>
+- [![](https://github.com/Bliss-Bass/aaropa_busybox/actions/workflows/build-linux.yml/badge.svg)](https://github.com/Bliss-Bass/aaropa_busybox) <p>
 This repo contains `busybox` program that is on initrd, it will also be built into .deb file
 
-- [![](https://github.com/BlissOS/aaropa_devuan_repo/actions/workflows/deplay-pages.yml/badge.svg)](https://github.com/BlissOS/aaropa_devuan_repo) <p>
+- [![](https://github.com/Bliss-Bass/aaropa_devuan_repo/actions/workflows/deplay-pages.yml/badge.svg)](https://github.com/Bliss-Bass/aaropa_devuan_repo) <p>
 This repo is a Debian (or Devuan) repository that contains the above programs.
 
-- [![](https://github.com/BlissOS/aaropa_rootfs/actions/workflows/extract-rootfs.yml/badge.svg)](https://github.com/BlissOS/aaropa_rootfs) <p>
+- [![](https://github.com/Bliss-Bass/aaropa_rootfs/actions/workflows/extract-rootfs.yml/badge.svg)](https://github.com/Bliss-Bass/aaropa_rootfs) <p>
 This repo is used to generate the `rootfs` image for the installer. It get the above repository to install the programs above and all the program listed in [Introduction](#introduction). After that, it will provide an image contains the installation environemnt, a `grub-rescue.iso` file as the skeleton of BlissOS iso image, and `initrd_lib.tar.gz` contains required programs & libraries for the initrd.
 
 ## Usage
@@ -50,7 +50,7 @@ This repo is used to generate the `rootfs` image for the installer. It get the a
 If your BlissOS source has `bootable/newinstaller`, remove it. After that, clone this repo to `bootable/aaropa`
 
 ```
-git clone https://github.com/BlissOS/bootable_aaropa.git
+git clone https://github.com/Bliss-Bass/bootable_aaropa.git
 ```
 
 Once done, run the `download.sh` script on the repo to get all the required files

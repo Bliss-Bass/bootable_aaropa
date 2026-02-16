@@ -97,7 +97,7 @@ cat << "EOF"
 EOF
 		# Copy bootanimation.zip
 		if [ -f /android/data/misc/bootanimation.zip ]; then
-			if [-f system/media/bootanimation.zip ]; then
+			if [ -f system/media/bootanimation.zip ]; then
 				# bind mount copied bootanimation.zip to system
 				mount --bind /android/data/misc/bootanimation.zip system/media/bootanimation.zip
 			elif [ -f system/product/media/bootanimation.zip ]; then
@@ -185,7 +185,7 @@ cat << "EOF"
 EOF
 		# bind init.bass-vendor.rc
 		if [ -f /android/data/vendor/etc/init/init.bass-vendor.rc ]; then
-			if [-f vendor/etc/init/init.bass-vendor.rc ]; then
+			if [ -f vendor/etc/init/init.bass-vendor.rc ]; then
 				mount --bind /android/data/vendor/etc/init/init.bass-vendor.rc vendor/etc/init/init.bass-vendor.rc
 			else
 cat << "EOF"
@@ -461,6 +461,10 @@ for s in /scripts/* /mnt/"$SRC"/scripts/*; do
 	# shellcheck disable=SC1090
 	test -e "$s" && source "$s"
 done
+
+if [ "$COPYTORAM" ] && [ "$COPYTORAM" != false ]; then
+	copy_to_ram
+fi
 
 setup_recovery || debug_shell fatal-err
 check_fstab
