@@ -1,6 +1,6 @@
-# shellcheck shell=ash
+# shellcheck shell=ash disable=2016,2068,3036,3060
 # By Shadichy <shadichy@blisslabs.org>
-# Last updated 2024/10/01
+# Last updated 2026/03/28
 #
 # License: GNU Public License
 # We explicitly grant the right to use the scripts
@@ -21,9 +21,8 @@ to_mntpt() {
 }
 
 handle_fstab_line() {
-	local device=$1 target=$2 # type=$3 flags=$4 vold_flags=$5
+	local device=$1 # target=$2 type=$3 flags=$4 vold_flags=$5
 
-	# shellcheck disable=SC3060,SC2016
 	case "$1" in
 	*'$SLOT'*) if [ "$SLOT" ]; then
 		local s _ss
@@ -129,10 +128,10 @@ link_fstab() {
 	ROOT_FSTAB=$(find "$MODE_BASE" -mindepth 1 -maxdepth 1 -type f -iname 'fstab.*' -print -quit)
 	fstab=${REAL_FSTAB:-$ROOT_FSTAB}
 
-	cat $fstab >>/tmp/fstab.real
-	mount --bind /tmp/fstab.real $fstab
+	cat "$fstab" >>/tmp/fstab.real
+	mount --bind /tmp/fstab.real "$fstab"
 
 	if [ "$REAL_FSTAB" ]; then
-		mount --bind /tmp/fstab.real $ROOT_FSTAB
+		mount --bind /tmp/fstab.real "$ROOT_FSTAB"
 	fi
 }

@@ -156,7 +156,7 @@ try_mount() {
 		return $?
 	fi
 
-	case $(blkid "$1") in
+	case "$(blkid "$1")" in
 	*TYPE=*ntfs*)
 		echo "WARNING: NTFS may not work well with BlissOS. Consider using another filesystem."
 		if [ "$USE_NTFS3" -ge 1 ] || [ "$BOOT_USE_NTFS3" -ge 1 ]; then
@@ -314,7 +314,7 @@ fi
 [ -d "$VTOY_PATH" ] && export HAS_VTOY=1 _root=/dev/mapper/ventoy
 
 # Wait for ROOT to appear
-ROOTWAIT=${ROOTWAIT:-30} # Default to 30 sec
+: ${ROOTWAIT:=30} # Default to 30 sec
 for _s in $(seq 0 $ROOTWAIT); do
 	# If is booting from Ventoy GRUB2 Mode
 	if [ "$HAS_VTOY" = 1 ]; then
