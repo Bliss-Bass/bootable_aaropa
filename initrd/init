@@ -159,7 +159,9 @@ try_mount() {
 	case "$(blkid "$1")" in
 	*TYPE=*ntfs*)
 		echo "WARNING: NTFS may not work well with BlissOS. Consider using another filesystem."
-		if [ "$USE_NTFS3" -ge 1 ] || [ "$BOOT_USE_NTFS3" -ge 1 ]; then
+		if [ "$USE_NTFSPLUS" -ge 1 ] || [ "$BOOT_USE_NTFSPLUS" -ge 1 ]; then
+			mount -t ntfs -o rw,force $@
+		elif [ "$USE_NTFS3" -ge 1 ] || [ "$BOOT_USE_NTFS3" -ge 1 ]; then
 			mount -t ntfs3 -o rw,noatime,windows_names $@
 		else
 			mount.ntfs-3g -o rw,force $@
