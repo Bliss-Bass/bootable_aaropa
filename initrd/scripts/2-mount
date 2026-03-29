@@ -114,7 +114,7 @@ process_fstab() {
 }
 
 link_fstab() {
-	ROOT_FSTAB=$(ls $MODE_BASE/fstab.*)
+	ROOT_FSTAB=$(find "$MODE_BASE" -mindepth 1 -maxdepth 1 -type f -iname 'fstab.*' -print -quit)
 	fstab=${REAL_FSTAB:-$ROOT_FSTAB}
 
 	cat $fstab >>/tmp/fstab.real
