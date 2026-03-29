@@ -36,7 +36,8 @@ handle_fstab_line() {
 	'$FS'*)
 		device=${1//'$FS'/"/mnt/$SRC"}
 		if [ -f "$device" ]; then
-			handle_fstab_line "/dev/loop$(setup_loop "$device")" "$2" "$3" "$4" "$5"
+			setup_loop "$device"
+			handle_fstab_line "/dev/loop$RESULT" "$2" "$3" "$4" "$5"
 		elif [ -d "$device" ]; then
 			if to_mntpt "$2"; then
 				mount --bind "$device" "${MODE_BASE}${RESULT}"

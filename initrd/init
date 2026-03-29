@@ -250,7 +250,7 @@ setup_loop() {
 		if [ "$2" ]; then
 			mknod "$2" b 7 "$((i * 16))"
 		else
-			echo "$i"
+			export RESULT=$i
 		fi
 
 		return 0
