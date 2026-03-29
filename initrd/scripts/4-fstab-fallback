@@ -16,7 +16,7 @@ check_fstab() {
     return $?
   fi
 
-  echo "Warning: No fstab found. Attempting to create one..."
+  echo "WARNING: No fstab found. Attempting to create one..."
   /bin/build-fstab "/mnt/$SRC" >$fstab_tmp ||
     debug_shell fatal-err
 
