@@ -8,6 +8,7 @@
 #
 # shellcheck disable=SC3036
 
+[ "$1" ] || exit 1
 src=$1
 
 # check if specified device has pattern like UUID= or LABEL=
@@ -28,11 +29,9 @@ done
 
 # Handling system image/folder
 _s=system\$SLOT
-
-if ls "$src"/system"$SLOT".?fs >/dev/null 2>&1; then
-	_s=$_s.$(basename "$(find "$src"/system"$SLOT".?fs | head -1)" | cut -f 2 -d '.')
-elif [ -e "$src/system$SLOT.img" ]; then
-	_s=$_s.img
+_img_s=$(find "$src" -mindepth 1 -maxdepth 1 -type f \( -iname "system$SLOT.?fs" -o -name "system$SLOT.img" \) -print -quit)
+if [ "$_img_s" ]; then
+	_s=$_s.$(basename "$_img_s" | cut -f 2 -d '.')
 elif [ -s "$src/system$SLOT/system/build.prop" ]; then
 	: # Do nothing
 elif [ -s "$src/system/build.prop" ]; then
