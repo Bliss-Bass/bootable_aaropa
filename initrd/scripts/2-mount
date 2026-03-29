@@ -57,6 +57,10 @@ handle_fstab_line() {
 		"system$SLOT")
 			# Keep system read-only unless rw is requested
 			mount ${3:+-t "$3"} ${4:+-o "$4"} -r "$device" /android
+			# Remount rw for recovery
+			if [ "$RCVRY" ]; then
+				mount -o remount,rw foo /android
+			fi
 
 			# Loop mount system.img
 			local _img=/android/system.img
