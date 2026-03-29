@@ -2,5 +2,5 @@
 # shellcheck shell=ash
 
 for mnt in $(mount | grep ' on '"${1%/}[/ ]" | awk '{print $3}' | tac); do
-	umount "$mnt"
+	umount "$@" "$mnt"
 done
