@@ -226,7 +226,7 @@ remount_rw() { mount -o remount,rw foo /mnt; }
 # Debug shell no longer takes arguments anymore
 debug_shell() { sh 2>&1; }
 
-_LAST_LOOP=0
+export _LAST_LOOP=0
 
 setup_loop() {
 	local base target
@@ -242,7 +242,7 @@ setup_loop() {
 			continue
 
 		# Assign to global variable _LAST_LOOP
-		_LAST_LOOP=$i
+		export _LAST_LOOP=$((i+1))
 
 		target=/dev/block/loop$i
 		ln -s "$base" "$target"
