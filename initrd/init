@@ -231,26 +231,30 @@ debug_shell() { sh 2>&1; }
 export _LAST_LOOP=0
 
 setup_loop() {
-	local base target
-	for i in $(seq $_LAST_LOOP 9); do
+	local base i=$_LAST_LOOP next
+	while :; do
 		base=/dev/loop$i
+		next=$((i + 1))
 
 		# If loop device is already set to other file
-		losetup "$base" >/dev/null 2>&1 &&
+		if losetup "$base" >/dev/null 2>&1; then
+			i=$next
 			continue
+		fi
 
 		# If loop device fails to setup
-		losetup "$base" "$1" >/dev/null 2>&1 ||
+		if ! losetup "$base" "$1" >/dev/null 2>&1; then
+			i=$next
 			continue
+		fi
 
 		# Assign to global variable _LAST_LOOP
-		export _LAST_LOOP=$((i + 1))
+		export _LAST_LOOP=$next
 
-		target=/dev/block/loop$i
-		ln -s "$base" "$target"
+		ln -s "$base" /dev/block
 
 		if [ "$2" ]; then
-			mknod "$2" b 7 "$((i * 16))"
+			mknod "$2" b 7 $((i * 16))
 		else
 			export RESULT=$i
 		fi
