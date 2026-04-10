@@ -5,17 +5,94 @@
 # License: GNU Public License
 # We explicitely grant the right to use the scripts
 # with Android-x86 project.
-#
+# shellcheck disable=3043
+
+auto_decomp() {
+	local file="$1" out="$2"
+	[ -f "$file" ] || return 1
+
+	# Supported (de)compressors: gunzip, bzcat, xzcat, lzcat, zcat
+	false ||
+		gunzip -c "$file" >"$out" ||
+		bzcat "$file" >"$out" ||
+		xzcat "$file" >"$out" ||
+		lzcat "$file" >"$out" ||
+		zcat "$file" >"$out" ||
+		return 2
+}
 
 setup_install() {
-	# Setup overlay on /install
-	mkdir -p /install /tmp/i_workdir /tmp/i_upperdir
-	mount -o loop "/mnt/$SRC/$INSTALL" /install
-	mount -t overlay \
-		-o lowerdir=/install,upperdir=/tmp/i_upperdir,workdir=/tmp/i_workdir \
-		overlay /install
+	# Install image overrides:
+	# - INSTALL=<file>					Auto detected
+	# - INSTALL=<file>:<type>		Specify type
+	# - INSTALL=								Unset to disable install mode
+	# default parent dir is /mnt/$SRC
+	# type: sfs/squashfs, efs/erofs, cpio, ext4
+	local install_file install_type
+	install_file="${INSTALL%:*}"
+	install_type="${INSTALL#*:}"
+
+	# Setup installer rootfs on /install
+	mkdir -p /install
+
+	if [ ! "$install_type" ]; then
+		# If can mount, is disk type
+		if mount -o loop "/mnt/$SRC/$install_file" /install; then
+			export INSTALL="$install_file:cpio"
+			setup_install
+			return $?
+		fi
+	else
+		case "$install_type" in
+		cpio)
+			# First, check for compression type
+			# Supported (de)compressors: gunzip, bzcat, xzcat, lzcat, zcat and none (cat)
+
+			auto_decomp "/mnt/$SRC/$install_file" /tmp/install.cpio
+			local ret=$?
+			if [ $ret = 1 ]; then
+				echo "File not found: $install_file"
+				return 1
+			else
+				[ $ret = 0 ] && install_file=/tmp/install.cpio
+				mount -t tmpfs tmpfs /install
+				cd /install
+
+				if ! { cat "$install_file" | cpio -iud; }; then
+					echo "Failed to extract $install_file"
+					return 1
+				fi
+			fi
+			;;
+		efs | sfs)
+			local fs
+			[ "$install_type" = sfs ] &&
+				fs=squashfs ||
+				fs=erofs
+			export INSTALL="$install_file:$fs"
+			setup_install
+			return $?
+			;;
+		*)
+			if ! grep -q "$install_type" /proc/filesystems; then
+				echo "Unsupported filesystem type: $install_type"
+				return 1
+			fi
+
+			mount -o loop -t "$install_type" "/mnt/$SRC/$install_file" /install
+			;;
+		esac
+	fi
+
+	if [ "$install_type" != cpio ]; then
+		mkir -p /tmp/i_workdir /tmp/i_upperdir
+		mount -t overlay \
+			-o lowerdir=/install,upperdir=/tmp/i_upperdir,workdir=/tmp/i_workdir \
+			overlay /install
+	fi
 
 	# Move mountpoints
+	mkdir -p /install/android /install/cdrom /install/source
 	mount --move /android /install/android
 	mount --move /mnt /install/cdrom
 
