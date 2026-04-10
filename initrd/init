@@ -379,6 +379,8 @@ fi
 
 if [ "$RCVRY" ]; then
 	MODE_BASE=/recovery
+elif [ "$INSTALL" ]; then
+	MODE_BASE=/install
 else
 	MODE_BASE=/android
 fi
@@ -403,7 +405,7 @@ process_fstab
 
 probe_recovery
 
-link_fstab
+[ "$INSTALL" ] || link_fstab
 
 if [ 0"$DEBUG" -gt 1 ]; then
 	echo -e "\nType 'exit' to continue booting...\n"
@@ -432,7 +434,7 @@ if [ 0"$DEBUG" -gt 2 ]; then
 fi
 
 if [ "$INSTALL" ]; then
-	exec ${SWITCH:-switch_root} /install /sbin/init
+	INITRD_BOOTLOG=/install/bootlog.txt
 else
 	# We must disable mdev before switching to Android
 	# since it conflicts with Android's init
@@ -441,14 +443,15 @@ else
 	# Use correct modprobe location
 	echo /system/bin/modprobe >/proc/sys/kernel/modprobe
 
-	export ANDROID_ROOT=/system
-
-	# Copy /tmp/log to /android/data/bootlog.txt if DEBUG mode is set
-	[ -n "$DEBUG" ] && cp /tmp/log /android/data/bootlog.txt
-
-	# shellcheck disable=SC2093
-	exec ${SWITCH:-switch_root} $MODE_BASE /init
+	INITRD_BOOTLOG=/android/data/bootlog.txt
 fi
+
+[ -n "$DEBUG" ] && cp /tmp/log "$INITRD_BOOTLOG"
+
+export ANDROID_ROOT=/system
+
+# shellcheck disable=SC2093
+exec "${SWITCH:-switch_root}" $MODE_BASE /init
 
 # avoid kernel panic
 while :; do
