@@ -125,13 +125,12 @@ process_fstab() {
 }
 
 link_fstab() {
-	ROOT_FSTAB=$(find "$MODE_BASE" -mindepth 1 -maxdepth 1 -type f -iname 'fstab.*' -print -quit)
-	fstab=${REAL_FSTAB:-$ROOT_FSTAB}
+	local root_fstab
+	root_fstab=$(find "$MODE_BASE" -mindepth 1 -maxdepth 1 -type f -iname 'fstab.*' -print -quit)
 
+	local fstab=${REAL_FSTAB:-$root_fstab}
 	cat "$fstab" >>/tmp/fstab.real
 	mount --bind /tmp/fstab.real "$fstab"
 
-	if [ "$REAL_FSTAB" ]; then
-		mount --bind /tmp/fstab.real "$ROOT_FSTAB"
-	fi
+	[ "$REAL_FSTAB" ] && mount --bind /tmp/fstab.real "$root_fstab"
 }
