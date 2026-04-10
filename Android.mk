@@ -78,10 +78,14 @@ $(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) 
 .PHONY: initrdimage
 initrdimage: $(INITRD_RAMDISK)
 
+ifneq ($(USE_NEWINSTALLER),0)
+newinstaller := $(PRODUCT_OUT)/install.img
+endif
+
 INSTALLED_RADIOIMAGE_TARGET += $(INITRD_RAMDISK)
 INSTALLED_RADIOIMAGE_TARGET += $(PRODUCT_OUT)/ramdisk-recovery.img
 
-BUILT_IMG := $(addprefix $(PRODUCT_OUT)/,initrd.img ramdisk-recovery.img) $(systemimg)
+BUILT_IMG := $(addprefix $(PRODUCT_OUT)/,initrd.img ramdisk-recovery.img $(if $(newinstaller),$(newinstaller))) $(systemimg)
 BUILT_IMG += $(if $(TARGET_PREBUILT_KERNEL),$(TARGET_PREBUILT_KERNEL),$(PRODUCT_OUT)/kernel)
 
 ifneq ($(shell test -d $(LOCAL_PATH)/iso && echo exists), exists)

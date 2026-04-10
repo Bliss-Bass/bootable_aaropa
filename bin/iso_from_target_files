@@ -94,6 +94,21 @@ done
 INPUT_FILE_LOCATION=${@: -2:1}
 OUTPUT_FILE_LOCATION=${@: -1}
 
+# Guess install.img location if not specified
+if [ -z "$INSTALL_LOCATION" ]; then
+  echo "Try to guess where install image is"
+  ## out/target/product/*/install.img
+  ## or in this case: out/target/product/*/obj/PACKAGING/target_files_intermediates/*.zip/../../../../install.img
+  INSTALL_LOCATION="${INPUT_FILE_LOCATION}/../../../../install.img"
+  if [[ ! -f "$INSTALL_LOCATION" ]]; then
+    INSTALL_LOCATION="out/target/product/x86_64/install.img"
+    if [[ ! -f "$INSTALL_LOCATION" ]]; then
+      echo "Error: install.img still not found!"
+      echo "Assume newinstaller is not enabled."
+    fi
+  fi
+fi
+
 # Guess aaropa location if not specified
 if [ -z "$AAROPA_LOCATION" ]; then
   echo "Try to guess where aaropa is"
@@ -116,6 +131,15 @@ target_zip_content=(
   "IMAGES/system.img"
   "RADIO/initrd.img"
 )
+
+if [ -f "$INSTALL_LOCATION" ]; then
+  if [ -f RADIO/install.img ]; then
+    export INSTALL_LOCATION="RADIO/install.img"
+  fi
+  target_zip_content+=("$INSTALL_LOCATION")
+else
+  target_zip_content+=("$AAROPA_LOCATION/iso/install.sfs")
+fi
 
 for content in "${target_zip_content[@]}"; do
   unzip -l $INPUT_FILE_LOCATION | grep $content
@@ -141,6 +165,11 @@ mv $tmp_dir/BOOT/kernel $tmp_dir/kernel
 mv $tmp_dir/IMAGES/recovery.img $tmp_dir/ramdisk-recovery.img
 mv $tmp_dir/IMAGES/system.img $tmp_dir/system.img
 mv $tmp_dir/RADIO/initrd.img $tmp_dir/initrd.img
+if [ -f "$INSTALL_LOCATION" ]; then
+  mv $INSTALL_LOCATION $tmp_dir/install.img
+else
+  mv $AAROPA_LOCATION/iso/install.sfs $tmp_dir/install.sfs
+fi
 rm -rf $tmp_dir/BOOT $tmp_dir/IMAGES $tmp_dir/RADIO
 
 ## Compress system.img if specificed

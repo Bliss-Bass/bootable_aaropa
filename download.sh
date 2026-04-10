@@ -7,14 +7,6 @@ RELEASE_URL="https://github.com/BlissOS/aaropa_rootfs/releases/latest"
 SCRIPT_DIR=$(dirname "$0")
 cd "$SCRIPT_DIR" || exit
 
-# Files to download
-FILES=(
-  "install.sfs"
-  "initrd_lib.tar.gz"
-  "grub-rescue.iso"
-  "boot_hybrid.img"
-)
-
 # Function to remove existing files from the FILES list and directories
 remove_existing_files() {
   # Remove files listed in the FILES array
@@ -79,61 +71,67 @@ extract_initrd_lib() {
 
 # Function to display the help message
 show_help() {
-  cat << EOF
+  cat <<EOF
 Copyright (C) 2024 BlissLabs
 
 Usage: ./download.sh [OPTION]
 
 Options:
-  --initrd-only    Download and extract only the initrd_lib.tar.gz file.
-  --help           Show this help message and exit.
+  --initrd-only         Download and extract only the initrd_lib.tar.gz file.
+  --with-newinstaller   Download and extract excluding the install.sfs file.
+  --help                Show this help message and exit.
 EOF
 }
 
 # Handle the command line argument using a case statement
 case "$1" in
-  --help)
-    show_help
-    ;;
-  
-  --initrd-only)
-    # Remove existing files before starting the download
-    remove_existing_files
-
-    # Download only initrd_lib.tar.gz
-    if command -v aria2c &> /dev/null; then
-      download_with_aria2 "initrd_lib.tar.gz"
-    else
-      download_with_wget "initrd_lib.tar.gz"
-    fi
-
-    extract_initrd_lib
-    echo "Script execution complete!"
-    ;;
-  
-  *)
-    # Remove existing files before starting the download
-    remove_existing_files
-
-    # Check if aria2c is installed
-    if command -v aria2c &> /dev/null; then
-      echo "aria2c found, using aria2c for download."
-      for FILE in "${FILES[@]}"; do
-        download_with_aria2 "$FILE"
-      done
-    else
-      echo "aria2c not found, falling back to wget."
-      for FILE in "${FILES[@]}"; do
-        download_with_wget "$FILE"
-      done
-    fi
-
-    # Process the downloaded files
-    extract_grub_rescue_iso
-    move_install_sfs
-    extract_initrd_lib
-
-    echo "Script execution complete!"
-    ;;
+--help) show_help && exit 0 ;;
+--initrd-only) export INITRD_ONLY=true ;;
+--with-newinstaller) export WITH_NEWINSTALLER=true ;;
 esac
+
+# Files to download
+FILES=(
+  "initrd_lib.tar.gz"
+)
+
+if [ -z "$INITRD_ONLY" ]; then
+  FILES+=(
+    "grub-rescue.iso"
+    "boot_hybrid.img"
+
+  )
+fi
+
+if [ -z "$WITH_NEWINSTALLER" ]; then
+  FILES+=(
+    "install.sfs"
+  )
+fi
+
+# Remove existing files before starting the download
+remove_existing_files
+
+# Check if aria2c is installed
+if command -v aria2c &>/dev/null; then
+  echo "aria2c found, using aria2c for download."
+  for FILE in "${FILES[@]}"; do
+    download_with_aria2 "$FILE"
+  done
+else
+  echo "aria2c not found, falling back to wget."
+  for FILE in "${FILES[@]}"; do
+    download_with_wget "$FILE"
+  done
+fi
+
+# Process the downloaded files
+if [ -z "$INITRD_ONLY" ]; then
+  extract_grub_rescue_iso
+fi
+if [ -z "$WITH_NEWINSTALLER" ]; then
+  move_install_sfs
+fi
+extract_initrd_lib
+
 exit 0
