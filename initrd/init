@@ -337,10 +337,13 @@ if [ "$ROOT" ]; then
 	unset _root
 fi
 
+# FSTAB file name
+export "${FSTAB:=fstab.android}"
+
 cd /
 # If there's no ROOT= specified, try to find one for 5 times
 if [ ! "$ROOT" ] || ! try_mount ro "$ROOT" /mnt; then
-	: "${ROOT_SEARCH_FILES:="fstab.android ${BOOT_IMAGE#*/} system$SLOT.?fs system$SLOT.img system$SLOT/system/build.prop system/build.prop"}"
+	: "${ROOT_SEARCH_FILES:="$FSTAB ${BOOT_IMAGE#*/} system$SLOT.?fs system$SLOT.img system$SLOT/system/build.prop system/build.prop"}"
 
 	# If is live/install mode, prior to search for $INSTALL image, default to install.sfs
 	if [ "$INSTALL" ] || grep -q 'androidboot.live=true' /proc/cmdline; then
