@@ -197,6 +197,12 @@ EOF
 	fi
 }
 
+# OEM installation
+if [ -n "$OEM_INSTALL" ]; then
+	echo "Starting Installer"
+	INSTALL=install.img # Default for Bass
+fi
+
 # configure debugging output
 if [ "$DEBUG" ] || [ "$INSTALL" ] || [ "$RCVRY" ]; then
 	LOG=/tmp/log
