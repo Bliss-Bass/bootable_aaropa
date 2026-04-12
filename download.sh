@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # URL for the GitHub release page
-RELEASE_URL="https://github.com/Bliss-Bass/aaropa_rootfs/releases/latest"
+RELEASE_URL="https://github.com/Ananda-Aropa/aaropa_rootfs_installer_bass/releases/latest"
 
 # Get the script's directory and change to it
 SCRIPT_DIR=$(dirname "$0")
