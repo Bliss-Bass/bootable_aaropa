@@ -338,7 +338,8 @@ if [ "$ROOT" ]; then
 fi
 
 # FSTAB file name
-export "${FSTAB:=fstab.android}"
+: "${FSTAB:=fstab.android}"
+export FSTAB
 
 cd /
 # If there's no ROOT= specified, try to find one for 5 times
