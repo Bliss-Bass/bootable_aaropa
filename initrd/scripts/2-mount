@@ -53,9 +53,13 @@ handle_fstab_line() {
 	# Check if device is a block device
 	case "$device" in
 	/dev/*)
-		# Get major and minor of device
 		# shellcheck disable=SC2012
-		echo "#>$2 $(ls -ld "$device" | awk '{print $5$6}' | tr ',' ' ')"
+		case "$2" in
+		# Handle for Bass Data partition
+		"/data" | "userdata") export DATA_BLK=$device:$3:$4 ;;
+		# Get major and minor of device
+		*) echo "#>$2 $(ls -ld "$device" | awk '{print $5$6}' | tr ',' ' ')" ;;
+		esac
 
 		if to_mntpt "$2"; then
 			echo "/dev/block/by-name/$2 $RESULT $3 $4 $5"

@@ -91,7 +91,7 @@ bass_data_binds() {
 	# and if found, will bind mount it to system/media/bootanimation.zip
 
 	if [ "$ADDON_BOOTANIMATION" -gt "0" ]; then
-cat << "EOF"
+		cat <<"EOF"
 # WARNING: ADDON_BOOTANIMATION is overriding the default bootanimation.zip
 # This override might not work if you are using systemless root
 EOF
@@ -104,7 +104,7 @@ EOF
 				# bind mount copied bootanimation.zip to product
 				mount --bind /android/data/misc/bootanimation.zip system/product/media/bootanimation.zip
 			else
-cat << "EOF"
+				cat <<"EOF"
 # Bootanimation.zip not found in system/media or system/product/media
 # Bootanimation.zip will not be bind mounted
 EOF
@@ -119,7 +119,7 @@ EOF
 	#
 	# /system/usr/idc/Vendor_0eef_Product_c002_Version_0111.idc
 	if [ "$ADDON_IDC" -gt "0" ]; then
-cat << "EOF"
+		cat <<"EOF"
 # WARNING: ADDON_IDC is overriding idc files for this device.
 # This override will not work if you are using systemless root
 EOF
@@ -132,7 +132,7 @@ EOF
 
 	# Allow adding to input-ports-associations.xml file using bind mount
 	#
-	# This will let us add known input port associations to the system without 
+	# This will let us add known input port associations to the system without
 	# recompiling the OS by passing additional hosts through an input-ports-addon.xml file.
 	# How-To:
 	# dumpsys SurfaceFlinger - -display-id
@@ -143,7 +143,7 @@ EOF
 	# getevent -i | grep location
 	# location: "usb-xhci-cdns3-1.3.4/input0"
 	# location: "usb-xhci-cdns3-1.2.4/input0"
-	# 
+	#
 	# $ adb root
 	# $ adb push input-ports-addon.xml /data/misc/input-port-addon.xml
 	# input-ports-addon.xml: 1 file pushed, 0 skipped. 0.0 MB/s (8 bytes in 0.000s)
@@ -162,7 +162,7 @@ EOF
 	#
 	# Allow adding to hosts file using bind mount
 	if [ "$BLISS_INPUT_PORTS_ADDON" -gt "0" ]; then
-cat << "EOF"
+		cat <<"EOF"
 # WARNING: INPUT_PORTS_ADDON is overriding the default input-port-associations.xml file.
 # This override will not work if you are using systemless root
 EOF
@@ -176,10 +176,10 @@ EOF
 	#
 	# This change will let us place a init.bass-vendor.rc in data/vendor/etc/init/
 	# and if found, will bind mount it to vendor/etc/init/init.bass-vendor.rc
-	# Note: you will still want your .rc script to link to any .sh scripts from data. 
+	# Note: you will still want your .rc script to link to any .sh scripts from data.
 
 	if [ "$ADDON_BASSINIT" -gt "0" ]; then
-cat << "EOF"
+		cat <<"EOF"
 # WARNING: ADDON_BASSINIT is being used to override the default Bass OS init
 # This override might not work if you are using systemless root
 EOF
@@ -188,7 +188,7 @@ EOF
 			if [-f vendor/etc/init/init.bass-vendor.rc ]; then
 				mount --bind /android/data/vendor/etc/init/init.bass-vendor.rc vendor/etc/init/init.bass-vendor.rc
 			else
-cat << "EOF"
+				cat <<"EOF"
 # init.bass-vendor.rc not found in data/vendor/etc/init/
 # init.bass-vendor.rc will not be bind mounted
 EOF
@@ -550,6 +550,14 @@ else
 	INITRD_BOOTLOG=/android/data/bootlog.txt
 
 	# Load data bind mounts
+	# This requires /data to be mounted
+	if [ "$DATA_BLK" ]; then
+		blk=${DATA_BLK%%:*}
+		fs=${DATA_BLK#*:}
+		fs=${fs%%:*}
+		opt=${DATA_BLK##*:}
+		mount ${fs:+-t "$fs"} ${opt:+-o "$opt"} "$blk" /android/data
+	fi
 	bass_data_binds
 fi
 
