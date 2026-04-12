@@ -404,8 +404,7 @@ process_fstab
 [ "$RCVRY" ] || [ "$INSTALL" ] || bliss_feature
 
 probe_recovery
-
-[ "$INSTALL" ] || link_fstab
+link_fstab
 
 if [ 0"$DEBUG" -gt 1 ]; then
 	echo -e "\nType 'exit' to continue booting...\n"

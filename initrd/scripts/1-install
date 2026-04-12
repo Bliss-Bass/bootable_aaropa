@@ -29,4 +29,6 @@ setup_install() {
 	# Post setup
 	rm -f /system
 	ln -s /install/android/system /
+
+	export REAL_FSTAB=/install/etc/fstab
 }
