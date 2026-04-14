@@ -56,9 +56,8 @@ setup_install() {
 			else
 				[ $ret = 0 ] && install_file=/tmp/install.cpio
 				mount -t tmpfs tmpfs /install
-				cd /install
 
-				if ! { cat "$install_file" | cpio -iud; }; then
+				if ! { cd /install; cat "$install_file" | cpio -iud; }; then
 					echo "Failed to extract $install_file"
 					return 1
 				fi
@@ -84,7 +83,9 @@ setup_install() {
 		esac
 	fi
 
-	if [ "$install_type" != cpio ]; then
+	if [ "$install_type" = cpio ]; then
+		cp /scripts/00-ver /install/usr/share/scripts/00-ver
+	else
 		mkir -p /tmp/i_workdir /tmp/i_upperdir
 		mount -t overlay \
 			-o lowerdir=/install,upperdir=/tmp/i_upperdir,workdir=/tmp/i_workdir \
