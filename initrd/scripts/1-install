@@ -32,12 +32,15 @@ setup_install() {
 	install_file="${INSTALL%:*}"
 	install_type="${INSTALL#*:}"
 
+	# Unset if INSTALL does not contain ':'
+	[ "$install_type" = "$install_file" ] && install_type=
+
 	# Setup installer rootfs on /install
 	mkdir -p /install
 
 	if [ ! "$install_type" ]; then
 		# If can mount, is disk type
-		if mount -o loop "/mnt/$SRC/$install_file" /install; then
+		if ! mount -o loop "/mnt/$SRC/$install_file" /install; then
 			export INSTALL="$install_file:cpio"
 			setup_install
 			return $?
@@ -86,7 +89,7 @@ setup_install() {
 	if [ "$install_type" = cpio ]; then
 		cp /scripts/00-ver /install/usr/share/scripts/00-ver
 	else
-		mkir -p /tmp/i_workdir /tmp/i_upperdir
+		mkdir -p /tmp/i_workdir /tmp/i_upperdir
 		mount -t overlay \
 			-o lowerdir=/install,upperdir=/tmp/i_upperdir,workdir=/tmp/i_workdir \
 			overlay /install
