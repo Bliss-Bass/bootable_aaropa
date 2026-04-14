@@ -122,7 +122,7 @@ process_fstab() {
 	while read -r line; do
 		# shellcheck disable=SC2086
 		case "$line" in
-		''|'#'*) ;;
+		'#'*) ;;
 		*) handle_fstab_line $line ;;
 		esac
 	done </tmp/fstab.mirror >>/tmp/fstab.real
