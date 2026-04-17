@@ -135,7 +135,7 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) rm -rf $@
 	$(ACP) -pr $(dir $<) $@
 	$(hide) sed -i "s|OS_TITLE|$(if $(RELEASE_OS_TITLE),$(RELEASE_OS_TITLE),Android-x86)|" $@/boot/grub/grub.cfg
-	$(hide) sed -i "s|BlissOSLive|$(OS_LABEL)|" $@/boot/grub/grub.cfg
+	$(hide) sed -i "s|BlissOSLive|$(DISK_LABEL)|" $@/boot/grub/grub.cfg
 	$(hide) sed -i "s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $@/boot/grub/grub.cfg
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
