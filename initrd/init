@@ -375,29 +375,6 @@ setup_loop() {
 	done
 }
 
-setup_ab_loops() {
-	local ln_path=/dev/block/by-name
-	mkdir -p $ln_path
-
-	if [ "$SLOT" ]; then
-		local _slot
-		for _slot in _a _b; do
-			if [ "$SLOT" != "$_slot" ]; then
-				setup_loop "/mnt/$SRC/system$_slot.img" $ln_path/system$_slot
-			fi
-			setup_loop "/mnt/$SRC/initrd$_slot.img" $ln_path/initrd$_slot
-			setup_loop "/mnt/$SRC/kernel$_slot" $ln_path/kernel$_slot
-			setup_loop "/mnt/$SRC/recovery$_slot.img" $ln_path/recovery$_slot
-		done
-	else
-		setup_loop "/mnt/$SRC/initrd.img" $ln_path/initrd
-		setup_loop "/mnt/$SRC/kernel" $ln_path/kernel
-		setup_loop "/mnt/$SRC/recovery.img" $ln_path/recovery
-	fi
-
-	setup_loop "/mnt/$SRC/misc.img" $ln_path/misc
-}
-
 # shellcheck disable=SC2013
 for c in $(cat /proc/cmdline); do
 	case "$c" in
@@ -531,7 +508,6 @@ fi
 
 link_fstab
 
-setup_ab_loops
 mount_recovery
 setup_tslib
 setup_dpi
