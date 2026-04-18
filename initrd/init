@@ -229,6 +229,8 @@ if test x"$HAS_CTTY" != x"Yes"; then
 		# create device nodes then spawn on them
 		mknod /dev/tty2 c 4 2 && openvt
 		mknod /dev/tty3 c 4 3 && openvt
+		# using chroot instead of switch_root for debugging
+		export SWITCH=chroot
 	fi
 	if [ "$INSTALL" ] || [ "$DEBUG" ] || [ "$RCVRY" ]; then
 		echo 0 0 0 0 >/proc/sys/kernel/printk
