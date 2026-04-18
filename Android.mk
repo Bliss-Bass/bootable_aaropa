@@ -159,7 +159,7 @@ $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG)
 		-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label \
 		-hfs-bless-by i /System/Library/CoreServices/boot.efi --efi-boot efi.img -efi-boot-part --efi-boot-image \
 		--protective-msdos-label -o $@ $^ --sort-weight 0 / --sort-weight 1 /boot \
-		-V "$(DISK_LABEL)"
+		-V "$(DISK_LABEL)" -- -volid_for hfsplus "$(DISK_LABEL)_HFS"
 	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256
 	@echo -e ${CL_CYN}""${CL_CYN}
 	@echo -e ${CL_CYN}"      ___           ___                   ___           ___      "${CL_CYN}
