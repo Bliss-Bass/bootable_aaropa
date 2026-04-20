@@ -32,6 +32,7 @@ check_version() {
     LOCAL_VERSION=$(cat "$VERSION_FILE")
     if [[ "$LATEST_VERSION" == "$LOCAL_VERSION" ]]; then
       echo "You already have the latest version ($LATEST_VERSION). Skipping download."
+      move_install_sfs
       exit 0
     fi
   fi
@@ -95,8 +96,16 @@ extract_grub_rescue_iso() {
 
 # Function to move install.sfs to the iso directory
 move_install_sfs() {
-  echo "Moving install.sfs to iso directory..."
-  mv install.sfs iso/
+  if [ -z "$WITH_NEWINSTALLER" ]; then
+    if [ ! -f "iso/install.sfs" ]; then
+      echo "Copying install.sfs to iso directory..."
+      cp install.sfs iso/
+    fi
+  else
+    if [[ -f "iso/install.sfs" ]]; then
+      rm iso/install.sfs
+    fi
+  fi
 }
 
 # Function to extract initrd_lib.tar.gz and move the content to the initrd folder
@@ -172,9 +181,7 @@ fi
 if [ -z "$INITRD_ONLY" ]; then
   extract_grub_rescue_iso
 fi
-if [ -z "$WITH_NEWINSTALLER" ]; then
-  move_install_sfs
-fi
+move_install_sfs
 extract_initrd_lib
 
 # Save the new version
