@@ -84,7 +84,8 @@ $(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) 
 .PHONY: initrdimage
 initrdimage: $(INITRD_RAMDISK)
 
-ifneq ($(USE_NEWINSTALLER),0)
+ifeq ($(USE_NEWINSTALLER),true)
+$(warning newinstaller-ng is chosen to be the default installer)
 newinstaller := $(PRODUCT_OUT)/install.img
 endif
 
