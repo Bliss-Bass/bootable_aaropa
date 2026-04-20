@@ -150,11 +150,13 @@ else
 ROM_VENDOR_VERSION := $(BLISS_BUILD_ZIP)
 endif
 
+# Define the path to our AOSP-built xorriso host tool
+XORRISO_BIN := $(HOST_OUT_EXECUTABLES)/xorriso$(HOST_EXECUTABLE_SUFFIX)
+
 ISO_IMAGE := $(PRODUCT_OUT)/$(ROM_VENDOR_VERSION).iso
-$(ISO_IMAGE): $(iso_dir) $(BUILT_IMG)
+$(ISO_IMAGE): $(iso_dir) $(BUILT_IMG) $(XORRISO_BIN)
 	@echo ----- Making iso image ------
-	PATH="/sbin:/usr/sbin:/bin:/usr/bin"; \
-	xorriso -as mkisofs -graft-points --modification-date=$(MOD_DATE) -b /boot/grub/i386-pc/eltorito.img \
+	$(hide) $(XORRISO_BIN) -as mkisofs -graft-points --modification-date=$(MOD_DATE) -b /boot/grub/i386-pc/eltorito.img \
 		-no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr $(BOOT_HYBRID) \
 		-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label \
 		-hfs-bless-by i /System/Library/CoreServices/boot.efi --efi-boot efi.img -efi-boot-part --efi-boot-image \
