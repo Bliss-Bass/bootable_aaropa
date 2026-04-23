@@ -212,6 +212,9 @@ else
 fi
 exec 2>>$LOG
 
+# bypass /dev/dri release issues
+export SWITCH=chroot
+
 # early boot
 if test x"$HAS_CTTY" != x"Yes"; then
 	# initialise /proc & /sys and /tmp
@@ -223,7 +226,7 @@ if test x"$HAS_CTTY" != x"Yes"; then
 	busybox --install -s /bin/
 
 	# spawn shells on tty 2 and 3 if debug or install
-	if [ "$INSTALL" ] || [ "$DEBUG" ]; then
+	if [ "$INSTALL" ] || [ "$DEBUG" ] || [ "$GENTLE_BOOT" ]; then
 		# ensure they can open a controlling tty
 		mknod /dev/tty c 5 0
 		# create device nodes then spawn on them
@@ -232,7 +235,7 @@ if test x"$HAS_CTTY" != x"Yes"; then
 		# using chroot instead of switch_root for debugging
 		export SWITCH=chroot
 	fi
-	if [ "$INSTALL" ] || [ "$DEBUG" ] || [ "$RCVRY" ]; then
+	if [ "$INSTALL" ] || [ "$DEBUG" ] || [ "$RCVRY" ] || [ "$GENTLE_BOOT" ]; then
 		echo 0 0 0 0 >/proc/sys/kernel/printk
 	fi
 	# initialise /dev (first time)
@@ -403,9 +406,21 @@ for _d in /dev/[hmnsvx][dmrv][0-9a-z]*; do
 	ln -s "$_d" /dev/block/
 done
 
-if [ 0"$DEBUG" -gt 0 ]; then
+if [ 0"$DEBUG" -gt 0 ] ; then
 	echo -e "\nType 'exit' to continue booting...\n"
 	debug_shell debug-pre
+fi
+
+if [ "$GENTLE_BOOT" ] ; then
+	export DEBUG=1
+fi
+
+if [ "$GENTLE_BOOT" == 1 ]; then
+	echo -e "\nContinuing with a gentle boot...\n"
+	debug_shell debug-pre << EOF
+sleep 5
+exit
+EOF
 fi
 
 [ -d "$VTOY_PATH" ] && export HAS_VTOY=1 ROOT=/dev/mapper/ventoy
