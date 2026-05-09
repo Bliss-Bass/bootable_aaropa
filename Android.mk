@@ -104,7 +104,7 @@ MOD_DATE := $(shell date +"%Y%m%d%H%M%S"00)
 # While DISK_LABEL will be used for label in iso
 
 # OS_LABEL logic
-OS_LABEL := $(if $(RELEASE_OS_TITLE),$(RELEASE_OS_TITLE),Android-x86)_$(shell date "+%Y%m%d")
+OS_LABEL := $(if $(RELEASE_OS_TITLE),$(RELEASE_OS_TITLE),Android-x86)_$(shell date "+%Y%m%d%H")
 
 # DISK_LABEL logic (Format: XXXXX_YYJJJ)
 # Get date format: 2-digit year (%y) + 3-digit day of year (%j)
