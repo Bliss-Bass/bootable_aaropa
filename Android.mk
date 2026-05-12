@@ -17,14 +17,25 @@ BUILD_TOP := $(shell pwd)
 ifneq ($(filter x86%,$(TARGET_ARCH)),)
 LOCAL_PATH := $(call my-dir)
 
-RELEASE_OS_TITLE := BassOS
-SHORTEN_RELEASE_OS_TITLE := BOS15
-VER := $(VERSION)
-ifeq ($(RELEASE_OS_TITLE),)
-RELEASE_OS_TITLE := BassOS-$(VERSION)
-else
-RELEASE_OS_TITLE := $(RELEASE_OS_TITLE)
+# Check if the vendor/lineage directory exists
+ifneq ($(wildcard vendor/lineage),)
+RELEASE_OS_TITLE := LineageOS
+SHORTEN_RELEASE_OS_TITLE := LOS21
+VER := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)
 endif
+
+# Check if the vendor/bass directory exists
+ifneq ($(wildcard vendor/bass),)
+    RELEASE_OS_TITLE := BassOS
+	SHORTEN_RELEASE_OS_TITLE := BOS15
+	VER := $(VERSION)
+	ifeq ($(RELEASE_OS_TITLE),)
+	RELEASE_OS_TITLE := BassOS-$(VERSION)
+	else
+	RELEASE_OS_TITLE := $(RELEASE_OS_TITLE)
+	endif
+endif
+
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := iso_from_target_files
@@ -34,8 +45,24 @@ LOCAL_MODULE_PATH := $(HOST_OUT)/bin
 
 include $(BUILD_PREBUILT)
 
+ifneq ($(wildcard vendor/lineage),)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := repack_ramdisk_recovery
+LOCAL_SRC_FILES := bin/repack_ramdisk_recovery
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_MODULE_PATH := $(HOST_OUT)/bin
+
+include $(BUILD_PREBUILT)
+
+endif
+
 .PHONY: iso_scripts
+ifneq ($(wildcard vendor/lineage),)
+iso_scripts: iso_from_target_files repack_ramdisk_recovery
+else
 iso_scripts: iso_from_target_files
+endif
 
 # use squashfs or erofs for iso, unless explictly disabled
 ifneq ($(USE_SQUASHFS),0)
@@ -71,6 +98,18 @@ endif
 
 TARGET_INITRD_OUT := $(PRODUCT_OUT)/initrd
 INITRD_RAMDISK := $(TARGET_INITRD_OUT).img
+ifneq ($(wildcard vendor/lineage),)
+$(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) $(HOST_OUT_EXECUTABLES)/toybox
+	$(hide) rm -rf $(TARGET_INITRD_OUT)
+	mkdir -p $(addprefix $(TARGET_INITRD_OUT)/,android apex mnt proc scripts sys tmp)
+	$(if $(TARGET_INITRD_SCRIPTS),$(ACP) -p $(TARGET_INITRD_SCRIPTS) $(TARGET_INITRD_OUT)/scripts)
+	echo "VER=$(VER)" > $(TARGET_INITRD_OUT)/scripts/00-ver
+	$(if $(RELEASE_OS_TITLE),echo "OS_TITLE=$(RELEASE_OS_TITLE)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
+	$(if $(INSTALL_PREFIX),echo "INSTALL_PREFIX=$(INSTALL_PREFIX)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
+	$(ACP) -dpr $(initrd_dir)/* $(initrd_lib_dir)/* $(TARGET_INITRD_OUT)
+	cd $(TARGET_INITRD_OUT); find . | cpio -o | gzip -9 > ../initrd.img
+
+else
 $(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) $(HOST_OUT_EXECUTABLES)/toybox
 	$(hide) rm -rf $(TARGET_INITRD_OUT)
 	mkdir -p $(addprefix $(TARGET_INITRD_OUT)/,android apex mnt proc scripts sys tmp)
@@ -80,6 +119,8 @@ $(INITRD_RAMDISK): $(initrd_bin) $(systemimg) $(TARGET_INITRD_SCRIPTS) | $(ACP) 
 	$(if $(INSTALL_PREFIX),echo "INSTALL_PREFIX=$(INSTALL_PREFIX)" >> $(TARGET_INITRD_OUT)/scripts/00-ver)
 	$(ACP) -dpr $(initrd_dir)/* $(initrd_lib_dir)/* $(TARGET_INITRD_OUT)
 	cd $(TARGET_INITRD_OUT); find . | $(HOST_OUT_EXECUTABLES)/toybox cpio -o | gzip -9 > $@; cd -
+
+endif
 
 .PHONY: initrdimage
 initrdimage: $(INITRD_RAMDISK)
@@ -141,20 +182,25 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
 
+
+
+ifneq ($(wildcard vendor/lineage),)
+ISO_IMAGE := $(PRODUCT_OUT)/lineage-$(LINEAGE_VERSION).iso
+else
 # Use vendor defined version names
 ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)-$(TARGET_ARCH)-$(shell date +%Y%m%d%H%M)
-
 BUILD_NAME_VARIANT := $(ROM_VENDOR_VERSION)
 ifeq ($(BLISS_BUILD_ZIP),)
 ROM_VENDOR_VERSION := $(RELEASE_OS_TITLE)$(BLISS_SPECIAL_VARIANT)-$(TARGET_ARCH)-$(shell date +%Y%m%d%H)
 else
 ROM_VENDOR_VERSION := $(BLISS_BUILD_ZIP)
 endif
+ISO_IMAGE := $(PRODUCT_OUT)/$(ROM_VENDOR_VERSION).iso
+endif
 
 # Define the path to our AOSP-built xorriso host tool
 XORRISO_BIN := $(HOST_OUT_EXECUTABLES)/xorriso$(HOST_EXECUTABLE_SUFFIX)
 
-ISO_IMAGE := $(PRODUCT_OUT)/$(ROM_VENDOR_VERSION).iso
 $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG) $(XORRISO_BIN)
 	@echo ----- Making iso image ------
 	$(hide) $(XORRISO_BIN) -as mkisofs -graft-points --modification-date=$(MOD_DATE) -b /boot/grub/i386-pc/eltorito.img \
@@ -162,29 +208,10 @@ $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG) $(XORRISO_BIN)
 		-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label \
 		-hfs-bless-by i /System/Library/CoreServices/boot.efi --efi-boot efi.img -efi-boot-part --efi-boot-image \
 		--protective-msdos-label -o $@ $^ --sort-weight 0 / --sort-weight 1 /boot \
-		-V "$(DISK_LABEL)" -- -volid_for hfsplus "$(DISK_LABEL)_HFS"
-	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"      ___           ___                   ___           ___      "${CL_CYN}
-	@echo -e ${CL_CYN}"     /\  \         /\__\      ___        /\  \         /\  \     "${CL_CYN}
-	@echo -e ${CL_CYN}"    /::\  \       /:/  /     /\  \      /::\  \       /::\  \    "${CL_CYN}
-	@echo -e ${CL_CYN}"   /:/\:\  \     /:/  /      \:\  \    /:/\ \  \     /:/\ \  \   "${CL_CYN}
-	@echo -e ${CL_CYN}"  /::\~\:\__\   /:/  /       /::\__\  _\:\~\ \  \   _\:\~\ \  \  "${CL_CYN}
-	@echo -e ${CL_CYN}" /:/\:\ \:\__\ /:/__/     __/:/\/__/ /\ \:\ \ \__\ /\ \:\ \ \__\ "${CL_CYN}
-	@echo -e ${CL_CYN}" \:\~\:\/:/  / \:\  \    /\/:/  /    \:\ \:\ \/__/ \:\ \:\ \/__/ "${CL_CYN}
-	@echo -e ${CL_CYN}"  \:\ \::/  /   \:\  \   \::/__/      \:\ \:\__\    \:\ \:\__\   "${CL_CYN}
-	@echo -e ${CL_CYN}"   \:\/:/  /     \:\  \   \:\__\       \:\/:/  /     \:\/:/  /   "${CL_CYN}
-	@echo -e ${CL_CYN}"    \::/__/       \:\__\   \/__/        \::/  /       \::/  /    "${CL_CYN}
-	@echo -e ${CL_CYN}"     ~~            \/__/                 \/__/         \/__/     "${CL_CYN}
-	@echo -e ${CL_CYN}""${CL_CYN}
-	@echo -e ${CL_CYN}"===========-Bliss Package Complete-==========="${CL_RST}
-	@echo -e ${CL_CYN}"Zip: "${CL_MAG} $(ISO_IMAGE)${CL_RST}
-	@echo -e ${CL_CYN}"SHA256: "${CL_MAG}" `cat $(ISO_IMAGE).sha256 | cut -d ' ' -f 1`"${CL_RST}
-	@echo -e ${CL_CYN}"Size:"${CL_MAG}" `ls -lah $(ISO_IMAGE) | cut -d ' ' -f 5`"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ${CL_CYN}"Have A Truly Blissful Experience"${CL_RST}
-	@echo -e ${CL_CYN}"==============================================="${CL_RST}
-	@echo -e ""
+		-V "$(DISK_LABEL)"
+	$(hide) $(SHA256) $(ISO_IMAGE) | sed "s|$(PRODUCT_OUT)/||" > $(ISO_IMAGE).sha256sum
+	@echo "Package Complete: $(ISO_IMAGE)" >&2
+
 
 .PHONY: iso_img
 iso_img: $(ISO_IMAGE)
