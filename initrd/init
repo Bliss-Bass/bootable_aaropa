@@ -14,42 +14,26 @@
 PATH=/sbin:/bin:/system/bin:/system/xbin:/vendor/bin:/system_ext/bin:/system/vendor/bin:/system/system_ext/bin
 export PATH
 
-# ASCII art
+# ASCII art — generated from Bass / Lineage logo sources
+# Regenerate: vendor/ax86-lite/tools/generate_boot_banner.py --update-init bootable/aaropa/initrd/init
 text_art() {
 	cat <<"EOF"
 
-  		 	+++                     
-  			+++                     
-  			+++ +++                 
-  		+++ +++ +++     +++          
-  		+++ +++ +++ +++ +++          
-  		+++ +++ +++ +++ +++ +++  +   
-  		+++ +++ +++ +++ +++ +++ +++  
-  		+++ +++ +++ +++ +++ +++ +++  
-  		+++ +++ +++ +++ +++ +++  +   
-  		+++ +++ +++ +++ +++          
-  		+++ +++ +++     +++          
-   			+++ +++                 
- 	 		+++                     
- 	 		+++                     
- 						
- 			    Bass OS 14.0
-	-------------------------------------
-	Broad Apparatus Support System (BASS)
-	-------------------------------------
-                                             
-	    Based off Lineage OS ATV 21.0 
-	   by Navotpala Tech and BlissLabs
-	-------------------------------------
+  #                      ####
+# # #                   #    #
+# # # # #              #  ##  #
+# # # # # #            # #### #
+# # # # # #      ####### #### #######
+# # # # #        #  ## #  ##  # ##  #
+# # #            #  #   #    #   #  #
+  #              ####    ####    ####
 
-                  *********                  
-                **         **                
-               **    ***    **               
-              **   *******   **              
-    *****  *****   *******   *****  *****    
-  **    ***    **    ***    **    ***    **  
-  **     *      **         **      *     **  
-   *******        *********        *******         
+Bass: Lineout
+------------------------------------------------------------------------
+Broad Apparatus Support System on LineageOS — x86 tablet, desktop,
+gaming handheld, kiosk & signage OS. Fleet config and hardware mapping.
+Built by Navotpala Tech and BlissLabs.
+------------------------------------------------------------------------
 
 EOF
 }
