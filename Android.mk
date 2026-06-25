@@ -50,7 +50,7 @@ endef
 endif
 
 ifneq ($(USE_EROFS),0)
-MKEROFS := $(HOST_OUT_EXECUTABLES)/make_erofs$(HOST_EXECUTABLE_SUFFIX)
+MKEROFS := $(HOST_OUT_EXECUTABLES)/mkfs.erofs$(HOST_EXECUTABLE_SUFFIX)
 
 define build-erofs-target
 	$(hide) $(MKEROFS) -zlz4hc -C65536 $(2) $(systemimage_intermediates)
