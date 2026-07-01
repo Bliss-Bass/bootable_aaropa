@@ -139,7 +139,7 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
 
-ISO_IMAGE := $(PRODUCT_OUT)/lineage-$(LINEAGE_VERSION).iso
+ISO_IMAGE := $(PRODUCT_OUT)/bass-lineout-$(LINEAGE_VERSION).iso
 $(ISO_IMAGE): $(iso_dir) $(BUILT_IMG)
 	@echo ----- Making iso image ------
 	PATH="/sbin:/usr/sbin:/bin:/usr/bin"; \
