@@ -1,0 +1,89 @@
+# aaropa.lock
+#
+# Source of truth is Ananda-Aropa, not the Bliss-Bass git forks (those lagged
+# Bliss/Ananda-Aropa and must be rebased later).
+#
+# Local image builds (later):
+#   FROM Ananda-Aropa aaropa_rootfs_base + aaropa_calamares (current Bliss-stable
+#   Calamares/theme engine). Bass is an overlay: calamares_branding_bassos,
+#   grub-theme-bassos, and optional aaropa_calamares_modules_bass.
+#
+# Fetch (now):
+#   bliss|bass selects the matching Ananda-Aropa GitHub release. Bass release
+#   already uses grub-theme-bassos; extra Bass Calamares packages are commented
+#   out upstream until we rebuild them on this newer base.
+#
+# Stamp hash of this file invalidates cached iso/ initrd_lib/ boot_hybrid.img.
+# Pins are Ananda-Aropa HEAD as of 2026-08-18 (rootfs_base branch: latest).
+
+lock_version=2
+default_source=bass
+upstream=ananda
+
+[base]
+repos=aaropa_rootfs_base aaropa_calamares aaropa_busybox aaropa_deb_repo grub2-themes
+aaropa_rootfs_base.url=https://github.com/Ananda-Aropa/aaropa_rootfs_base.git
+aaropa_rootfs_base.ref=4b0a9356f2c5cbae1ddf8ee00e3fa6d1a5500958
+aaropa_calamares.url=https://github.com/Ananda-Aropa/aaropa_calamares.git
+aaropa_calamares.ref=103797b0dbd29a32afc26f086bda586cf74b77bd
+aaropa_busybox.url=https://github.com/Ananda-Aropa/aaropa_busybox.git
+aaropa_busybox.ref=a979458cce7e9cb5f4d1d393810f6a925a870c55
+aaropa_deb_repo.url=https://github.com/Ananda-Aropa/aaropa_deb_repo.git
+aaropa_deb_repo.ref=8e8655473346d667c59346e07ad8525603ed155d
+grub2-themes.url=https://github.com/Ananda-Aropa/grub2-themes.git
+grub2-themes.ref=1979a59181fe80c7c5f383273c1722cfdaf1d33f
+
+[fetch.bliss]
+github_repo=Ananda-Aropa/aaropa_rootfs_installer_blissos
+tag=latest
+assets=install.sfs initrd_lib.tar.gz grub-rescue.iso boot_hybrid.img
+
+[fetch.bass]
+github_repo=Ananda-Aropa/aaropa_rootfs_installer_bass
+tag=latest
+assets=install.sfs initrd_lib.tar.gz grub-rescue.iso boot_hybrid.img
+
+[flavor.bliss]
+installer.url=https://github.com/Ananda-Aropa/aaropa_rootfs_installer_blissos.git
+installer.ref=da5f3295ba68a50a724d434088dfac7a4b10f6b1
+branding=bliss
+calamares_settings_pkg=calamares-settings-blissos
+grub_theme_pkg=grub-theme-blissos-white-1080p
+
+[flavor.bass]
+installer.url=https://github.com/Ananda-Aropa/aaropa_rootfs_installer_bass.git
+installer.ref=26eb1fa5fef460052ad99d36d5774f87be2260de
+branding=bass
+# Upstream pkglist currently comments out aaropa-calamares-extensions-bass and
+# calamares-settings-bassos. Local builds should keep Bliss-stable Calamares
+# from [base] and apply [branding.bass] on top; extra Bass install options
+# get reintroduced after those packages are rebuilt on this base.
+calamares_settings_pkg=calamares-settings-blissos
+grub_theme_pkg=grub-theme-bassos-white-1080p
+
+[branding.bliss]
+calamares.url=https://github.com/Ananda-Aropa/calamares_branding_blissos.git
+calamares.ref=f6bafc4ad26570b96e95fca18a946e6a7629bafa
+
+[branding.bass]
+calamares.url=https://github.com/Ananda-Aropa/calamares_branding_bassos.git
+calamares.ref=788cd4cc064b787d7c71e3f69fc786bb988e3437
+modules.url=https://github.com/Ananda-Aropa/aaropa_calamares_modules_bass.git
+modules.ref=4f782792bb96bd13eedda4960fc6caf5733a0e22
+netinstall.url=https://github.com/Ananda-Aropa/aaropa_calamares_modules_netinstall.git
+netinstall.ref=960d7ad2102b8071bf371d22d5850d3791ae5b7d
+
+[legacy.bliss-bass]
+# Stale Bliss-Bass forks. Not used for fetch or local image builds.
+# Rebase these onto Ananda-Aropa/Bliss when extra Bass install options return.
+repos=aaropa_rootfs aaropa_busybox aaropa_calamares aaropa_devuan_repo grub2-themes
+aaropa_rootfs.url=https://github.com/Bliss-Bass/aaropa_rootfs.git
+aaropa_rootfs.ref=925b8a2978a52f7d33ddfcf3515f70a81a222c5f
+aaropa_busybox.url=https://github.com/Bliss-Bass/aaropa_busybox.git
+aaropa_busybox.ref=0d05a382ee68a101d1e99d19b3c6381ebbbcd216
+aaropa_calamares.url=https://github.com/Bliss-Bass/aaropa_calamares.git
+aaropa_calamares.ref=6d0edd7195ece195de7fcfee04b68c592161afe1
+aaropa_devuan_repo.url=https://github.com/Bliss-Bass/aaropa_devuan_repo.git
+aaropa_devuan_repo.ref=1df27fb4c3f880cbaf7771930a63e455136e4ae9
+grub2-themes.url=https://github.com/Bliss-Bass/grub2-themes.git
+grub2-themes.ref=bb1afadc7fc081ade303b3c70c50b03109148d86

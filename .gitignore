@@ -6,3 +6,5 @@ iso/
 initrd_lib/
 *.iso
 version.txt
+.src/
+.cache/
