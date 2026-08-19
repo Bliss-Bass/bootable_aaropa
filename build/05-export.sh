@@ -14,7 +14,8 @@ aaropa_export_image() {
 
   aaropa_log "exporting $tag"
   cid="$("$runtime" create "$tag")"
-  "$runtime" export "$cid" | tar -C "${work}/install" -p -x
+  "$runtime" export "$cid" | tar -C "${work}/install" -p -x \
+    --exclude=dev --exclude=proc --exclude=sys --exclude=run --exclude=tmp
   "$runtime" rm "$cid" >/dev/null
 
   if [[ "$runtime" != "podman" ]]; then
