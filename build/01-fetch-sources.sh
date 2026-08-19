@@ -18,7 +18,7 @@ aaropa_git_checkout() {
 }
 
 aaropa_fetch_sources() {
-  local recipe url ref brand_url brand_ref installer_short branding_short
+  local recipe url ref brand_url brand_ref installer_short branding_short source_url source_ref source_short
 
   if [[ -z "${AAROPA_BRANDING:-}" ]]; then
     AAROPA_BRANDING="$(lock_get "flavor.${AAROPA_SOURCE}" branding)"
@@ -33,6 +33,7 @@ aaropa_fetch_sources() {
   ref="$(lock_get_required "flavor.${recipe}" installer.ref)"
   aaropa_git_checkout "$url" "$ref" "${AAROPA_SRC_DIR}/installer"
   AAROPA_INSTALLER_SRC="${AAROPA_SRC_DIR}/installer"
+  AAROPA_SOURCE_INSTALLER_SRC="$AAROPA_INSTALLER_SRC"
 
   brand_url="$(lock_get "branding.${AAROPA_BRANDING}" calamares.url)"
   brand_ref="$(lock_get "branding.${AAROPA_BRANDING}" calamares.ref)"
@@ -43,14 +44,31 @@ aaropa_fetch_sources() {
     AAROPA_BRANDING_SRC=""
   fi
 
+  if [[ "$recipe" != "$AAROPA_SOURCE" ]]; then
+    source_url="$(lock_get_required "flavor.${AAROPA_SOURCE}" installer.url)"
+    source_ref="$(lock_get_required "flavor.${AAROPA_SOURCE}" installer.ref)"
+    aaropa_git_checkout "$source_url" "$source_ref" "${AAROPA_SRC_DIR}/installer-source"
+    AAROPA_SOURCE_INSTALLER_SRC="${AAROPA_SRC_DIR}/installer-source"
+    source_short="$(git -C "$AAROPA_SOURCE_INSTALLER_SRC" rev-parse --short=12 HEAD)"
+  else
+    source_url="$url"
+    source_short=""
+  fi
+
   installer_short="$(git -C "$AAROPA_INSTALLER_SRC" rev-parse --short=12 HEAD)"
   AAROPA_RELEASE_REPO="$url"
   AAROPA_RELEASE_TAG="$installer_short"
+  if [[ -n "$source_short" ]]; then
+    AAROPA_RELEASE_TAG="${AAROPA_RELEASE_TAG}-${source_short}"
+  fi
   if [[ -n "${AAROPA_BRANDING_SRC:-}" ]]; then
     branding_short="$(git -C "$AAROPA_BRANDING_SRC" rev-parse --short=12 HEAD)"
-    AAROPA_RELEASE_TAG="${installer_short}-${branding_short}"
+    AAROPA_RELEASE_TAG="${AAROPA_RELEASE_TAG}-${branding_short}"
   fi
   aaropa_log "installer recipe ${recipe} at ${url}@${installer_short}"
+  if [[ -n "$source_short" ]]; then
+    aaropa_log "source overlay ${AAROPA_SOURCE} at ${source_url}@${source_short}"
+  fi
   if [[ -n "${AAROPA_BRANDING_SRC:-}" ]]; then
     aaropa_log "branding ${AAROPA_BRANDING} at ${brand_url}@${branding_short}"
   fi

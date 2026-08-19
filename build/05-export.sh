@@ -21,6 +21,7 @@ aaropa_export_image() {
   aaropa_restore_vfs_dirs "${work}/install"
   aaropa_apply_branding "${work}/install"
   aaropa_apply_install_options "${work}/install"
+  aaropa_apply_rootfs_theme "${work}/install"
 
   if [[ "$runtime" != "podman" ]]; then
     aaropa_die "local export currently requires podman unshare (no sudo). Install podman or use --fetch"
