@@ -90,7 +90,8 @@ scripts_sha256() {
       "${AAROPA_ROOT}/build/01-fetch-sources.sh" \
       "${AAROPA_ROOT}/build/04-image.sh" \
       "${AAROPA_ROOT}/build/05-export.sh" \
-      "${AAROPA_ROOT}/build/branding.sh"
+      "${AAROPA_ROOT}/build/branding.sh" \
+      "${AAROPA_ROOT}/build/options.sh"
     do
       [[ -f "$f" ]] && file_sha256 "$f"
     done
@@ -125,6 +126,7 @@ mode=${AAROPA_MODE}
 release_tag=${AAROPA_RELEASE_TAG:-}
 release_repo=${AAROPA_RELEASE_REPO:-}
 initrd_only=${AAROPA_INITRD_ONLY:-0}
+options_yaml_sha256=${AAROPA_OPTIONS_YAML_SHA256:-}
 EOF
 }
 

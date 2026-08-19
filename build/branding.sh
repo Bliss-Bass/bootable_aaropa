@@ -1,7 +1,6 @@
 # Overlay Ananda-Aropa Calamares branding onto an exported installer rootfs.
-# Branding only: look (branding dir, welcome strings, branding: key) plus the
-# GRUB theme already swapped in the image pkglist. Do not copy bass settings.conf
-# (presets/bassoptions) or calamares/scripts/10_bass (Bass boot-option menus).
+# Look: branding dir, welcome strings, branding: key. GRUB theme is swapped in
+# the image pkglist. Install-time option catalogs are applied by options.sh.
 # Sourced by aaropa-prebuilt.sh.
 
 aaropa_apply_branding() {
@@ -24,7 +23,7 @@ aaropa_apply_branding() {
   settings="${root}/etc/calamares/settings.conf"
   [[ -f "$settings" ]] || aaropa_die "image has no /etc/calamares/settings.conf; Bass local builds need the Bliss installer recipe (flavor.bass.image_from=bliss)"
 
-  aaropa_log "overlaying Calamares branding ${AAROPA_BRANDING} (look only; Bliss sequence kept)"
+  aaropa_log "overlaying Calamares branding ${AAROPA_BRANDING}"
   mkdir -p "${root}/etc/calamares"
   rsync -a "${src}/branding/" "${root}/etc/calamares/branding/"
 
