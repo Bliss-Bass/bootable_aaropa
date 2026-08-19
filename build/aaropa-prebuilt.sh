@@ -6,12 +6,12 @@
 # --fetch  Download the matching Ananda-Aropa GitHub release instead.
 #
 # --source=bliss|bass is an Ananda-Aropa installer flavor, not Bliss-Bass git
-# forks. Bass builds on the Bliss-stable Calamares/base; branding overlays
-# come from Ananda-Aropa calamares_branding_* (see aaropa.lock).
+# forks. Local Bass builds the current Bliss installer recipe, then overlays
+# Ananda-Aropa Bass Calamares look + Bass GRUB theme (see aaropa.lock).
 #
 # Environment:
 #   AAROPA_SOURCE    bliss|bass (default: lockfile default_source, currently bass)
-#   AAROPA_BRANDING  overlay name (recorded in stamp; applied in later steps)
+#   AAROPA_BRANDING  overlay name (default: flavor branding; Bass = look only)
 #   AAROPA_REBUILD=1 ignore stamp
 
 set -euo pipefail
@@ -28,6 +28,8 @@ source "${AAROPA_BUILD_DIR}/01-fetch-sources.sh"
 source "${AAROPA_BUILD_DIR}/04-image.sh"
 # shellcheck source=05-export.sh
 source "${AAROPA_BUILD_DIR}/05-export.sh"
+# shellcheck source=branding.sh
+source "${AAROPA_BUILD_DIR}/branding.sh"
 
 AAROPA_MODE="${AAROPA_MODE:-local}"
 AAROPA_SOURCE="${AAROPA_SOURCE:-}"
@@ -47,7 +49,7 @@ Options:
   --local              Build install.sfs locally with rootless Podman (default)
   --fetch              Fetch Ananda-Aropa GitHub release artifacts instead
   --source=bliss|bass  Ananda-Aropa installer flavor (default: ${default_hint})
-  --branding=NAME      Ananda-Aropa branding overlay (stamp only until overlays land)
+  --branding=NAME      Ananda-Aropa branding overlay (bass = look + GRUB theme only)
   --rebuild            Ignore stamp and refetch/rebuild
   --initrd-only        Only fetch and extract initrd_lib (--fetch)
   --dry-run            Print stamp and planned action; do not build or download
@@ -115,6 +117,11 @@ case "$AAROPA_SOURCE" in
   *) aaropa_die "--source must be bliss or bass Ananda-Aropa flavor (got '$AAROPA_SOURCE')" ;;
 esac
 
+if [[ -z "$AAROPA_BRANDING" ]]; then
+  AAROPA_BRANDING="$(lock_get "flavor.${AAROPA_SOURCE}" branding)"
+  AAROPA_BRANDING="${AAROPA_BRANDING:-$AAROPA_SOURCE}"
+fi
+
 if [[ "$AAROPA_CHECK_DEPS" == "1" ]]; then
   aaropa_check_deps all
   exit $?
@@ -142,6 +149,8 @@ if [[ "$AAROPA_MODE" == "local" ]]; then
     echo "action=local-build"
     echo "installer_src=${AAROPA_INSTALLER_SRC}"
     echo "image_tag=$(aaropa_image_tag)"
+    echo "image_recipe=${AAROPA_IMAGE_RECIPE:-}"
+    echo "branding_src=${AAROPA_BRANDING_SRC:-}"
     exit 0
   fi
 

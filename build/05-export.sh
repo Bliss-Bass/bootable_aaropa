@@ -18,6 +18,9 @@ aaropa_export_image() {
     --exclude=dev --exclude=proc --exclude=sys --exclude=run --exclude=tmp
   "$runtime" rm "$cid" >/dev/null
 
+  aaropa_restore_vfs_dirs "${work}/install"
+  aaropa_apply_branding "${work}/install"
+
   if [[ "$runtime" != "podman" ]]; then
     aaropa_die "local export currently requires podman unshare (no sudo). Install podman or use --fetch"
   fi
@@ -44,7 +47,7 @@ aaropa_export_image() {
       chmod 4754 "$helper"
     fi
     rm -rf initrd_lib initrd_lib.tar.gz install_lib install_lib.tar.gz
-    mksquashfs "$install_dir" "$out_dir/install.sfs" -noappend -comp zstd -force-uid 0 -force-gid 0
+    mksquashfs "$install_dir" "$out_dir/install.sfs" -noappend -comp zstd
   ' bash "${work}/install" "${work}/out" "$helper"
 
   [[ -s "${work}/out/install.sfs" ]] || aaropa_die "mksquashfs did not produce install.sfs"
