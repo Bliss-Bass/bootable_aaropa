@@ -32,6 +32,8 @@ source "${AAROPA_BUILD_DIR}/05-export.sh"
 source "${AAROPA_BUILD_DIR}/branding.sh"
 # shellcheck source=options.sh
 source "${AAROPA_BUILD_DIR}/options.sh"
+# shellcheck source=rootfs-theme.sh
+source "${AAROPA_BUILD_DIR}/rootfs-theme.sh"
 
 AAROPA_MODE="${AAROPA_MODE:-local}"
 AAROPA_SOURCE="${AAROPA_SOURCE:-}"
@@ -154,6 +156,7 @@ if [[ "$AAROPA_MODE" == "local" ]]; then
     echo "installer_src=${AAROPA_INSTALLER_SRC}"
     echo "image_tag=$(aaropa_image_tag)"
     echo "image_recipe=${AAROPA_IMAGE_RECIPE:-}"
+    echo "source_installer_src=${AAROPA_SOURCE_INSTALLER_SRC:-}"
     echo "branding_src=${AAROPA_BRANDING_SRC:-}"
     exit 0
   fi

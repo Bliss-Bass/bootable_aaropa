@@ -91,7 +91,8 @@ scripts_sha256() {
       "${AAROPA_ROOT}/build/04-image.sh" \
       "${AAROPA_ROOT}/build/05-export.sh" \
       "${AAROPA_ROOT}/build/branding.sh" \
-      "${AAROPA_ROOT}/build/options.sh"
+      "${AAROPA_ROOT}/build/options.sh" \
+      "${AAROPA_ROOT}/build/rootfs-theme.sh"
     do
       [[ -f "$f" ]] && file_sha256 "$f"
     done

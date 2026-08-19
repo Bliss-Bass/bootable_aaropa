@@ -42,7 +42,7 @@ aaropa_resolve_options_yaml() {
 
 aaropa_apply_install_options() {
   local root="$1"
-  local yaml src dest
+  local yaml dest
   [[ -n "${AAROPA_OPTIONS_YAML_RESOLVED:-}" ]] || return 0
 
   dest="${root}/etc/calamares/modules/options.yaml"
@@ -52,8 +52,22 @@ aaropa_apply_install_options() {
   mkdir -p "$(dirname "$dest")"
   cp -f "$yaml" "$dest"
 
-  src="${AAROPA_BRANDING_SRC:-}/calamares/modules/options.conf"
-  if [[ -f "$src" ]]; then
-    cp -f "$src" "${root}/etc/calamares/modules/options.conf"
+  # Keep groupsUrl configured so the options module actually loads entries.
+  if [[ -f "${root}/etc/calamares/modules/options.conf" ]] && ! grep -q '^groupsUrl:' "${root}/etc/calamares/modules/options.conf"; then
+    cat >"${root}/etc/calamares/modules/options.conf" <<'EOF'
+# SPDX-FileCopyrightText: no
+# SPDX-License-Identifier: CC0-1.0
+---
+groupsUrl:
+ - file:///usr/share/calamares/modules/options.yaml
+ - file:///etc/calamares/modules/options.yaml
+
+required: true
+
+label:
+ sidebar: "Options"
+ title: "Additional options"
+ subtitle: "WARNING: Check out https://example.com/bassos-docs to know which options to choose.\nDO NOT TRY TO PICK ALL OPTIONS AT ONCE !!!"
+EOF
   fi
 }
