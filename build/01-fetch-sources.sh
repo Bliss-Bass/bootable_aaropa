@@ -12,17 +12,13 @@ aaropa_fetch_sources() {
 
   if [[ ! -d "${dir}/.git" ]]; then
     aaropa_log "cloning $url into $dir"
-    git clone --filter=blob:none "$url" "$dir"
+    git clone "$url" "$dir"
   else
     aaropa_log "updating installer sources in $dir"
     git -C "$dir" remote set-url origin "$url"
-    git -C "$dir" fetch --tags origin
   fi
-
-  if ! git -C "$dir" checkout --detach "$ref"; then
-    git -C "$dir" fetch origin "$ref"
-    git -C "$dir" checkout --detach "$ref"
-  fi
+  git -C "$dir" fetch origin
+  git -C "$dir" checkout --detach "$ref"
 
   AAROPA_INSTALLER_SRC="$dir"
   AAROPA_RELEASE_REPO="$url"
