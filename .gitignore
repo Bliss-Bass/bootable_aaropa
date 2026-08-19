@@ -1,3 +1,4 @@
+version.txt
 install.sfs*
 initrd_lib.tar.gz*
 grub-rescue.iso*
@@ -5,6 +6,6 @@ boot_hybrid.img*
 iso/
 initrd_lib/
 *.iso
-version.txt
+# Local Podman prebuild clones (01-fetch-sources.sh)
 .src/
 .cache/
