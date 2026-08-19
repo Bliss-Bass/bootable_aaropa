@@ -30,6 +30,8 @@ source "${AAROPA_BUILD_DIR}/04-image.sh"
 source "${AAROPA_BUILD_DIR}/05-export.sh"
 # shellcheck source=branding.sh
 source "${AAROPA_BUILD_DIR}/branding.sh"
+# shellcheck source=options.sh
+source "${AAROPA_BUILD_DIR}/options.sh"
 
 AAROPA_MODE="${AAROPA_MODE:-local}"
 AAROPA_SOURCE="${AAROPA_SOURCE:-}"
@@ -121,6 +123,8 @@ if [[ -z "$AAROPA_BRANDING" ]]; then
   AAROPA_BRANDING="$(lock_get "flavor.${AAROPA_SOURCE}" branding)"
   AAROPA_BRANDING="${AAROPA_BRANDING:-$AAROPA_SOURCE}"
 fi
+
+aaropa_resolve_options_yaml
 
 if [[ "$AAROPA_CHECK_DEPS" == "1" ]]; then
   aaropa_check_deps all
