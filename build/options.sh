@@ -52,11 +52,14 @@ aaropa_apply_install_options() {
   mkdir -p "$(dirname "$dest")"
   cp -f "$yaml" "$dest"
 
-  # Keep groupsUrl configured so the options module actually loads entries.
-  if [[ -f "${root}/etc/calamares/modules/options.conf" ]] && ! grep -q '^groupsUrl:' "${root}/etc/calamares/modules/options.conf"; then
+  # Bass options.conf should keep the known-good Bliss groupsUrl wiring.
+  # options.yaml carries the Bass-specific expanded option catalog.
+  if [[ -f "${root}/etc/calamares/modules/options.conf" ]]; then
     cat >"${root}/etc/calamares/modules/options.conf" <<'EOF'
 # SPDX-FileCopyrightText: no
 # SPDX-License-Identifier: CC0-1.0
+# sets default options option groups list, first fetches from the net.
+# second will be used as fallback if fetching fails
 ---
 groupsUrl:
  - file:///usr/share/calamares/modules/options.yaml
@@ -67,7 +70,7 @@ required: true
 label:
  sidebar: "Options"
  title: "Additional options"
- subtitle: "WARNING: Check out https://example.com/bassos-docs to know which options to choose.\nDO NOT TRY TO PICK ALL OPTIONS AT ONCE !!!"
+ subtitle: "WARNING: Check out https://tinyurl.com/4ahpktk4 to know which options to choose.\nDO NOT TRY TO PICK ALL OPTIONS AT ONCE !!!"
 EOF
   fi
 }
