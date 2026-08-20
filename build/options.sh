@@ -1,6 +1,7 @@
 # Overlay Bass install-time Calamares options from vendor aaropa-options.
 # Uses the Bliss `options` view module already in the image; replaces its YAML
-# catalog with vendor_packages/aaropa-options/boot_options/options.yaml.
+# catalog with addons/aaropa-options/.../boot_options/options.yaml (23.2) or
+# vendor_packages/aaropa-options/boot_options/options.yaml (21.0).
 # Does not compile aaropa_calamares_modules_bass (presets/bassoptions .so).
 # Sourced by aaropa-prebuilt.sh.
 
@@ -18,6 +19,11 @@ aaropa_find_options_yaml() {
       printf '%s\n' "$f"
       return 0
     fi
+  fi
+  f="${AAROPA_ROOT}/../../vendor/ax86-lite/addons/aaropa-options/packages/aaropa-options/boot_options/options.yaml"
+  if [[ -f "$f" ]]; then
+    printf '%s\n' "$f"
+    return 0
   fi
   f="${AAROPA_ROOT}/../../vendor/ax86-lite/vendor_packages/aaropa-options/boot_options/options.yaml"
   if [[ -f "$f" ]]; then
