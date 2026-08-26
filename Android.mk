@@ -137,6 +137,14 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) sed -i "s|BlissOSLive|$(OS_LABEL)|" $@/boot/grub/grub.cfg
 	$(hide) sed -i "s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $@/boot/grub/grub.cfg
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
+ifeq ($(BASS_GRUB_LOCK),1)
+	# Live USB: keep menu visible and wait for a choice. Installed timeout/hidden
+	# come from /etc/bass_grub.env baked by apply_grub_overrides.sh.
+	$(hide) sed -i -E "s/^set timeout=.*/set timeout=-1/" $@/boot/grub/grub.cfg || true
+	$(hide) grep -qE '^set timeout_style=' $@/boot/grub/grub.cfg \
+		&& sed -i -E "s/^set timeout_style=.*/set timeout_style=menu/" $@/boot/grub/grub.cfg \
+		|| sed -i -E "/^set timeout=/a set timeout_style=menu" $@/boot/grub/grub.cfg
+else
 ifneq ($(BASS_GRUB_TIMEOUT),)
 	$(hide) sed -i -E "s/^set timeout=.*/set timeout=$(BASS_GRUB_TIMEOUT)/" $@/boot/grub/grub.cfg || true
 endif
@@ -144,6 +152,7 @@ ifneq ($(BASS_GRUB_TIMEOUT_STYLE),)
 	$(hide) grep -qE '^set timeout_style=' $@/boot/grub/grub.cfg \
 		&& sed -i -E "s/^set timeout_style=.*/set timeout_style=$(BASS_GRUB_TIMEOUT_STYLE)/" $@/boot/grub/grub.cfg \
 		|| sed -i -E "/^set timeout=/a set timeout_style=$(BASS_GRUB_TIMEOUT_STYLE)" $@/boot/grub/grub.cfg
+endif
 endif
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
 
