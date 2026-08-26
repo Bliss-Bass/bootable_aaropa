@@ -23,6 +23,20 @@ aaropa_export_image() {
   aaropa_apply_install_options "${work}/install"
   aaropa_apply_rootfs_theme "${work}/install"
 
+  # Bake Bass GRUB timeout/lock into the install rootfs *before* mksquashfs so we
+  # never need a second user-level unsquash/resquash (that rewrites UIDs and
+  # strips dbus setuid, which breaks Calamares partition detection).
+  _grub_apply="$(cd "${AAROPA_ROOT}/../.." && pwd)/vendor/ax86-lite/tools/apply_grub_overrides.sh"
+  if [[ -f "$_grub_apply" ]] && {
+       [[ "${BASS_GRUB_LOCK:-0}" == "1" ]] ||
+       [[ -n "${BASS_GRUB_TIMEOUT:-}" ]] ||
+       [[ -n "${BASS_GRUB_TIMEOUT_STYLE:-}" ]]
+     }; then
+    aaropa_log "staging BASS_GRUB_* into install rootfs before squash"
+    AOSP_ROOT="$(cd "${AAROPA_ROOT}/../.." && pwd)" AAROPA_ROOT="$AAROPA_ROOT" \
+      bash "$_grub_apply" --stage-root "${work}/install"
+  fi
+
   if [[ "$runtime" != "podman" ]]; then
     aaropa_die "local export currently requires podman unshare (no sudo). Install podman or use --fetch"
   fi
