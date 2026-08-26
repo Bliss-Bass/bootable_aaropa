@@ -141,6 +141,13 @@ if [[ "$AAROPA_MODE" == "local" ]]; then
 
   aaropa_fetch_sources
 
+  # Vendor aaropa-src patchsets (grublock 10_blissos / oem-install, etc.)
+  _AOSP_ROOT="$(cd "${AAROPA_ROOT}/../.." && pwd)"
+  _SRC_PATCHES="${_AOSP_ROOT}/vendor/ax86-lite/tools/apply_aaropa_src_patches.sh"
+  if [[ -x "$_SRC_PATCHES" ]] || [[ -f "$_SRC_PATCHES" ]]; then
+    AOSP_ROOT="$_AOSP_ROOT" AAROPA_ROOT="$AAROPA_ROOT" bash "$_SRC_PATCHES"
+  fi
+
   if [[ "$AAROPA_REBUILD" != "1" ]] && aaropa_artifacts_ok "$AAROPA_INITRD_ONLY" && aaropa_stamp_matches; then
     aaropa_log "stamp matches (local ${AAROPA_SOURCE} ${AAROPA_RELEASE_TAG}); skipping"
     if [[ "$AAROPA_DRY_RUN" == "1" ]]; then

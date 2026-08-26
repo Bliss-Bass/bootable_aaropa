@@ -27,6 +27,13 @@ aaropa_apply_branding() {
   mkdir -p "${root}/etc/calamares"
   rsync -a "${src}/branding/" "${root}/etc/calamares/branding/"
 
+  # Vendor grublock patches live in calamares/scripts/ (e.g. 10_blissos).
+  if [[ -d "${src}/scripts" ]]; then
+    mkdir -p "${root}/etc/calamares/scripts" "${root}/usr/share/calamares/scripts"
+    rsync -a "${src}/scripts/" "${root}/etc/calamares/scripts/"
+    rsync -a "${src}/scripts/" "${root}/usr/share/calamares/scripts/"
+  fi
+
   component="$(lock_get "branding.${AAROPA_BRANDING}" component)"
   if [[ -z "$component" ]]; then
     desc="$(find "${src}/branding" -name branding.desc -print -quit || true)"
@@ -39,7 +46,7 @@ aaropa_apply_branding() {
   find "${root}/etc/calamares/branding" -mindepth 1 -maxdepth 1 -type d ! -name "$component" -exec rm -rf {} +
 
   mkdir -p "${root}/etc/calamares/modules"
-  for welcome in welcome.conf welcomeq.conf; do
+  for welcome in welcome.conf welcomeq.conf bootcfg.conf; do
     if [[ -f "${src}/modules/${welcome}" ]]; then
       cp -f "${src}/modules/${welcome}" "${root}/etc/calamares/modules/"
     fi

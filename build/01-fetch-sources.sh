@@ -12,9 +12,13 @@ aaropa_git_checkout() {
   else
     aaropa_log "updating $dir"
     git -C "$dir" remote set-url origin "$url"
+    # Drop local edits (vendor patches are re-applied after fetch) so --rebuild
+    # cannot abort on "local changes would be overwritten by checkout".
+    git -C "$dir" reset --hard HEAD >/dev/null 2>&1 || true
+    git -C "$dir" clean -fd >/dev/null 2>&1 || true
   fi
   git -C "$dir" fetch origin
-  git -C "$dir" checkout --detach "$ref"
+  git -C "$dir" checkout -f --detach "$ref"
 }
 
 aaropa_fetch_sources() {

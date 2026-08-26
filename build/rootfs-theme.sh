@@ -25,5 +25,12 @@ aaropa_apply_rootfs_theme() {
     fi
   done
 
+  # OEM installer (Bass template); may include bass_grub.env timeout/security hooks.
+  if [[ -f "${src}/template/usr/sbin/oem-install" ]]; then
+    mkdir -p "${root}/usr/sbin"
+    cp -f "${src}/template/usr/sbin/oem-install" "${root}/usr/sbin/oem-install"
+    chmod 755 "${root}/usr/sbin/oem-install"
+  fi
+
   rm -f "${root}/etc/bliss/blissos_logo.png" "${root}/etc/bliss/blissos_logo.svg"
 }
