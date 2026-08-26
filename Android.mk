@@ -137,6 +137,14 @@ $(iso_dir): $(shell find $(LOCAL_PATH)/iso -type f | sort -r) | $(ACP)
 	$(hide) sed -i "s|BlissOSLive|$(OS_LABEL)|" $@/boot/grub/grub.cfg
 	$(hide) sed -i "s|CMDLINE|$(BOARD_KERNEL_CMDLINE)|" $@/boot/grub/grub.cfg
 	$(hide) sed -i "s|VER|$(VER)|" $@/boot/grub/grub.cfg
+ifneq ($(BASS_GRUB_TIMEOUT),)
+	$(hide) sed -i -E "s/^set timeout=.*/set timeout=$(BASS_GRUB_TIMEOUT)/" $@/boot/grub/grub.cfg || true
+endif
+ifneq ($(BASS_GRUB_TIMEOUT_STYLE),)
+	$(hide) grep -qE '^set timeout_style=' $@/boot/grub/grub.cfg \
+		&& sed -i -E "s/^set timeout_style=.*/set timeout_style=$(BASS_GRUB_TIMEOUT_STYLE)/" $@/boot/grub/grub.cfg \
+		|| sed -i -E "/^set timeout=/a set timeout_style=$(BASS_GRUB_TIMEOUT_STYLE)" $@/boot/grub/grub.cfg
+endif
 	$(hide) echo "$(BOARD_KERNEL_CMDLINE)" > $@/cmdline.txt
 
 ISO_IMAGE := $(PRODUCT_OUT)/bass-lineout-$(LINEAGE_VERSION).iso
