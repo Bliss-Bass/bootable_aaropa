@@ -30,9 +30,10 @@ aaropa_export_image() {
   if [[ -f "$_grub_apply" ]] && {
        [[ "${BASS_GRUB_LOCK:-0}" == "1" ]] ||
        [[ -n "${BASS_GRUB_TIMEOUT:-}" ]] ||
-       [[ -n "${BASS_GRUB_TIMEOUT_STYLE:-}" ]]
+       [[ -n "${BASS_GRUB_TIMEOUT_STYLE:-}" ]] ||
+       [[ -n "${BASS_BOOT_CATALOG:-}" ]]
      }; then
-    aaropa_log "staging BASS_GRUB_* into install rootfs before squash"
+    aaropa_log "staging BASS_GRUB_* / Bass catalog into install rootfs before squash"
     AOSP_ROOT="$(cd "${AAROPA_ROOT}/../.." && pwd)" AAROPA_ROOT="$AAROPA_ROOT" \
       bash "$_grub_apply" --stage-root "${work}/install"
   fi
