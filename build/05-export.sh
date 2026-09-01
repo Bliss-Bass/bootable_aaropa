@@ -23,31 +23,46 @@ aaropa_export_image() {
   aaropa_apply_install_options "${work}/install"
   aaropa_apply_rootfs_theme "${work}/install"
 
-  # Bake Bass GRUB timeout/lock into the install rootfs *before* mksquashfs so we
-  # never need a second user-level unsquash/resquash (that rewrites UIDs and
-  # strips dbus setuid, which breaks Calamares partition detection).
   _grub_apply="$(cd "${AAROPA_ROOT}/../.." && pwd)/vendor/ax86-lite/tools/apply_grub_overrides.sh"
+  _aosp_root="$(cd "${AAROPA_ROOT}/../.." && pwd)"
+  _stage_grub=0
   if [[ -f "$_grub_apply" ]] && {
        [[ "${BASS_GRUB_LOCK:-0}" == "1" ]] ||
        [[ -n "${BASS_GRUB_TIMEOUT:-}" ]] ||
        [[ -n "${BASS_GRUB_TIMEOUT_STYLE:-}" ]] ||
        [[ -n "${BASS_BOOT_CATALOG:-}" ]]
      }; then
-    aaropa_log "staging BASS_GRUB_* / Bass catalog into install rootfs before squash"
-    AOSP_ROOT="$(cd "${AAROPA_ROOT}/../.." && pwd)" AAROPA_ROOT="$AAROPA_ROOT" \
-      bash "$_grub_apply" --stage-root "${work}/install"
+    _stage_grub=1
   fi
 
   if [[ "$runtime" != "podman" ]]; then
     aaropa_die "local export currently requires podman unshare (no sudo). Install podman or use --fetch"
   fi
 
+  if [[ "$_stage_grub" == "1" ]]; then
+    aaropa_log "staging BASS_GRUB_* / Bass catalog into install rootfs before squash (podman unshare)"
+  fi
+
   aaropa_log "creating install.sfs (podman unshare, no sudo)"
-  podman unshare bash -c '
+  podman unshare env \
+    BASS_GRUB_LOCK="${BASS_GRUB_LOCK:-0}" \
+    BASS_GRUB_PASSWORD_HASH="${BASS_GRUB_PASSWORD_HASH:-}" \
+    BASS_GRUB_TIMEOUT="${BASS_GRUB_TIMEOUT:-}" \
+    BASS_GRUB_TIMEOUT_STYLE="${BASS_GRUB_TIMEOUT_STYLE:-}" \
+    BASS_BOOT_CATALOG="${BASS_BOOT_CATALOG:-}" \
+    AOSP_ROOT="$_aosp_root" \
+    AAROPA_ROOT="$AAROPA_ROOT" \
+    bash -c '
     set -euo pipefail
     install_dir="$1"
     out_dir="$2"
     helper="$3"
+    grub_apply="$4"
+    stage_grub="$5"
+  # podman export preserves container uid 0; stage GRUB/catalog in this namespace.
+    if [[ "$stage_grub" == "1" ]]; then
+      bash "$grub_apply" --stage-root "$install_dir"
+    fi
     cd "$install_dir"
     rm -rf .dockerenv
     if [[ -f grub-rescue.iso ]]; then
@@ -65,7 +80,8 @@ aaropa_export_image() {
     fi
     rm -rf initrd_lib initrd_lib.tar.gz install_lib install_lib.tar.gz
     mksquashfs "$install_dir" "$out_dir/install.sfs" -noappend -comp zstd
-  ' bash "${work}/install" "${work}/out" "$helper"
+  ' bash "${work}/install" "${work}/out" "$helper" "$_grub_apply" "$_stage_grub" \
+    || aaropa_die "install rootfs export failed (GRUB staging or mksquashfs)"
 
   [[ -s "${work}/out/install.sfs" ]] || aaropa_die "mksquashfs did not produce install.sfs"
   [[ -s "${work}/out/initrd_lib.tar.gz" ]] || aaropa_die "initrd_lib.tar.gz missing from exported image"
